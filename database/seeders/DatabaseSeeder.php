@@ -20,6 +20,10 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             BusinessPermissionSeeder::class,
             GrowyaDashboardPermissionSeeder::class,
+            GrowyaAdvancedDashboardPermissionSeeder::class,
+            BusinessCategorySeeder::class,
+            IndiaLocationSeeder::class,
+            
         ]);
     }
 }
