@@ -197,6 +197,29 @@
                     </div>
                 @endif
 
+
+{{-- Chat --}}
+@auth
+    @if ((int) auth()->id() !== (int) $business->owner_id)
+        <form method="POST" action="{{ route('growya.chat.start', $business) }}">
+            @csrf
+            <input type="hidden" name="context_type" value="service">
+            <input type="hidden" name="context_id" value="{{ $service->id }}">
+
+            <button type="submit"
+                class="w-full rounded-xl border border-emerald-700 px-5 py-3 font-semibold text-emerald-700 transition hover:bg-emerald-50">
+                💬 Chat With Seller
+            </button>
+        </form>
+    @endif
+@else
+    <a href="{{ route('login') }}"
+        class="block rounded-xl border border-slate-300 px-5 py-3 text-center font-semibold text-slate-700 transition hover:border-emerald-600 hover:text-emerald-700">
+        Login to Chat With Seller
+    </a>
+@endauth
+
+
                 <div class="border-t border-slate-200 pt-5">
                     <h2 class="font-black text-slate-900">Offered by {{ $business->name }}</h2>
                     <a class="mt-2 inline-block text-sm font-bold text-emerald-700"

@@ -382,6 +382,22 @@
                     </p>
                 </div>
 
+                @auth
+    <form method="POST" action="{{ route('growya.chat.start', $business) }}">
+        @csrf
+        <input type="hidden" name="context_type" value="product">
+        <input type="hidden" name="context_id" value="{{ $product->id }}">
+
+        <button type="submit" class="rounded-xl bg-emerald-700 px-5 py-3 text-white">
+            Chat With Seller
+        </button>
+    </form>
+@else
+    <a href="{{ route('login') }}">
+        Login to Chat With Seller
+    </a>
+@endauth
+
                 <div class="border-t border-slate-200 pt-5">
                     <h2 class="font-black text-slate-900">Sold by {{ $business->name }}</h2>
                     <a class="mt-2 inline-block text-sm font-bold text-emerald-700"
@@ -390,6 +406,7 @@
                     </a>
                 </div>
             </section>
+
         </div>
     </div>
 

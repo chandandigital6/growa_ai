@@ -60,8 +60,11 @@ use App\Http\Controllers\GrowyaPlanEntitlementController;
 use App\Http\Controllers\GrowyaBusinessPlanOverrideController;
 use App\Http\Controllers\GrowyaPaidPromotionController;
 use App\Http\Controllers\GrowyaAnalyticsController;
-
-
+use App\Http\Controllers\GrowyaSupportTicketController;
+use App\Http\Controllers\GrowyaBusinessKycController;
+use App\Http\Controllers\GrowyaChatController;
+use App\Http\Controllers\GrowyaChatEnhancementController;
+use App\Http\Controllers\GrowyaBusinessClaimController;
 
 Route::get('b/{business:slug}/offers', [PublicOfferController::class, 'index'])->name('public.business.offers');
 
@@ -173,6 +176,62 @@ Route::middleware('auth')->group(function () {
         ->name('growya.analytics.admin');
     Route::get('admin/analytics/export', [GrowyaAnalyticsController::class, 'adminExport'])
         ->name('growya.analytics.admin.export');
+
+
+
+    Route::get('support/tickets', [GrowyaSupportTicketController::class, 'index'])->name('growya.support.index');
+    Route::get('support/tickets/create', [GrowyaSupportTicketController::class, 'create'])->name('growya.support.create');
+    Route::post('support/tickets', [GrowyaSupportTicketController::class, 'store'])->middleware('throttle:5,1')->name('growya.support.store');
+    Route::get('support/tickets/{ticket}', [GrowyaSupportTicketController::class, 'show'])->name('growya.support.show');
+    Route::post('support/tickets/{ticket}/reply', [GrowyaSupportTicketController::class, 'reply'])->middleware('throttle:15,1')->name('growya.support.reply');
+    Route::patch('support/tickets/{ticket}/status', [GrowyaSupportTicketController::class, 'update'])->name('growya.support.update');
+    Route::patch('support/tickets/{ticket}/assign', [GrowyaSupportTicketController::class, 'assign'])->name('growya.support.assign');
+    Route::get('support/tickets/{ticket}/attachments/{attachment}', [GrowyaSupportTicketController::class, 'attachment'])->name('growya.support.attachment');
+
+
+
+
+
+    Route::get('businesses/{business}/kyc', [GrowyaBusinessKycController::class, 'owner'])->name('growya.kyc.owner');
+    Route::post('businesses/{business}/kyc', [GrowyaBusinessKycController::class, 'submit'])->middleware('throttle:3,1')->name('growya.kyc.submit');
+    Route::get('admin/business-kyc', [GrowyaBusinessKycController::class, 'admin'])->name('growya.kyc.admin');
+    Route::get('admin/business-kyc/{submission}', [GrowyaBusinessKycController::class, 'adminShow'])->name('growya.kyc.admin.show');
+    Route::patch('admin/business-kyc/{submission}', [GrowyaBusinessKycController::class, 'review'])->name('growya.kyc.review');
+    Route::get('business-kyc/{submission}/documents/{document}', [GrowyaBusinessKycController::class, 'download'])->name('growya.kyc.download');
+
+
+
+    Route::get('my-messages', [GrowyaChatController::class, 'mine'])->name('growya.chat.mine');
+    Route::get('businesses/{business}/messages', [GrowyaChatController::class, 'inbox'])->name('growya.chat.inbox');
+    Route::post('businesses/{business}/messages/start', [GrowyaChatController::class, 'start'])->middleware('throttle:15,1')->name('growya.chat.start');
+    Route::get('messages/{thread}', [GrowyaChatController::class, 'show'])->name('growya.chat.show');
+    Route::get('messages/{thread}/poll', [GrowyaChatController::class, 'poll'])->middleware('throttle:12,1')->name('growya.chat.poll');
+    Route::post('messages/{thread}', [GrowyaChatController::class, 'send'])->middleware('throttle:20,1')->name('growya.chat.send');
+    Route::get('messages/{thread}/files/{message}', [GrowyaChatController::class, 'file'])->name('growya.chat.file');
+
+
+
+    Route::patch('messages/{thread}/assign', [GrowyaChatEnhancementController::class, 'assign'])->name('growya.chat.assign');
+Route::patch('messages/{thread}/block', [GrowyaChatEnhancementController::class, 'block'])->name('growya.chat.block');
+Route::post('messages/{thread}/report', [GrowyaChatEnhancementController::class, 'report'])->middleware('throttle:5,1')->name('growya.chat.report');
+Route::patch('messages/{thread}/followup', [GrowyaChatEnhancementController::class, 'followup'])->name('growya.chat.followup');
+Route::get('messages/{thread}/activity', [GrowyaChatEnhancementController::class, 'activity'])->name('growya.chat.activity');
+Route::get('admin/chat-reports', [GrowyaChatEnhancementController::class, 'reports'])->name('growya.chat.reports');
+Route::patch('admin/chat-reports/{report}', [GrowyaChatEnhancementController::class, 'review'])->name('growya.chat.reports.review');
+Route::get('my-messages/unread-count', [GrowyaChatEnhancementController::class, 'unread'])->middleware('throttle:15,1')->name('growya.chat.unread');
+
+
+
+
+
+
+    Route::get('businesses/{business}/claim', [GrowyaBusinessClaimController::class, 'create'])->name('growya.claims.create');
+    Route::post('businesses/{business}/claim', [GrowyaBusinessClaimController::class, 'store'])->middleware('throttle:3,1')->name('growya.claims.store');
+    Route::get('my-business-claims', [GrowyaBusinessClaimController::class, 'mine'])->name('growya.claims.mine');
+    Route::get('business-claims/{claim}', [GrowyaBusinessClaimController::class, 'show'])->name('growya.claims.show');
+    Route::get('business-claims/{claim}/documents/{document}', [GrowyaBusinessClaimController::class, 'document'])->name('growya.claims.document');
+    Route::get('admin/business-claims', [GrowyaBusinessClaimController::class, 'admin'])->name('growya.claims.admin');
+    Route::patch('admin/business-claims/{claim}/review', [GrowyaBusinessClaimController::class, 'review'])->name('growya.claims.review');
 });
 
 
