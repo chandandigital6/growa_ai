@@ -1,0 +1,1098 @@
+<?php
+
+use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\RoleController;
+use App\Http\Middleware\EnsureTeamMembership;
+use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Features;
+use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\BusinessHourController;
+use App\Http\Controllers\BusinessSocialLinkController;
+use App\Http\Controllers\BusinessStaffController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\ProductTagController;
+use App\Http\Controllers\AttributeController;
+use App\Http\Controllers\ProductAttributeController;
+use App\Http\Controllers\ProductInventoryController;
+use App\Http\Controllers\ProductVariantAttributeController;
+use App\Http\Controllers\PublicProductController;
+use App\Http\Controllers\ProductQrCodeController;
+use App\Http\Controllers\ProductBulkController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceImageController;
+use App\Http\Controllers\PublicServiceEnquiryController;
+use App\Http\Controllers\ServiceEnquiryController;
+use App\Http\Controllers\ServiceEnquiryFollowUpController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\BusinessGalleryController;
+use App\Http\Controllers\BusinessVerificationController;
+use App\Http\Controllers\PublicBusinessController;
+use App\Http\Controllers\PublicMarketplaceController;
+use App\Http\Controllers\PublicHomeController;
+use App\Http\Controllers\GrowyaDashboardController;
+use App\Http\Controllers\GrowyaBusinessRequestController;
+use App\Http\Controllers\PublicGlobalSearchController;
+use App\Http\Controllers\BusinessFollowController;
+use App\Http\Controllers\BusinessReviewController;
+use App\Http\Controllers\AdminBusinessReviewController;
+use App\Http\Controllers\GrowyaNotificationController;
+use App\Http\Controllers\GrowyaLiveNotificationController;
+use App\Http\Controllers\BusinessOfferController;
+use App\Http\Controllers\PublicOfferController;
+use App\Http\Controllers\PublicOffersExploreController;
+use App\Http\Controllers\ProductEnquiryController;
+use App\Http\Controllers\GrowyaCartCheckoutController;
+use App\Http\Controllers\GrowyaBusinessOrderController;
+use App\Http\Controllers\GrowyaPaymentController;
+use App\Http\Controllers\GrowyaOrderReturnsController;
+use App\Http\Controllers\GrowyaDeliveryTrackingController;
+use App\Http\Controllers\GrowyaUserRoleController;
+use App\Http\Controllers\GrowyaBusinessOwnershipController;
+use App\Http\Controllers\GrowyaCustomerAddressController;
+use App\Http\Controllers\GrowyaWishlistController;
+use App\Http\Controllers\GrowyaCouponController;
+use App\Http\Controllers\GrowyaPlanEntitlementController;
+use App\Http\Controllers\GrowyaBusinessPlanOverrideController;
+use App\Http\Controllers\GrowyaPaidPromotionController;
+use App\Http\Controllers\GrowyaAnalyticsController;
+
+
+
+Route::get('b/{business:slug}/offers', [PublicOfferController::class, 'index'])->name('public.business.offers');
+
+Route::get(
+    'offers',
+    [PublicOffersExploreController::class, 'index']
+)->name('public.offers.index');
+
+Route::get(
+    'my-notifications/poll',
+    [GrowyaLiveNotificationController::class, 'poll']
+)->middleware(['auth', 'throttle:12,1'])
+    ->name('growya.notifications.poll');
+
+
+Route::get('my-notifications', [GrowyaNotificationController::class, 'index'])->name('growya.notifications.index');
+Route::post('my-notifications/{recipient}/open', [GrowyaNotificationController::class, 'open'])->name('growya.notifications.open');
+Route::patch('my-notifications/{recipient}/read', [GrowyaNotificationController::class, 'read'])->name('growya.notifications.read');
+Route::patch('my-notifications/read-all', [GrowyaNotificationController::class, 'readAll'])->name('growya.notifications.read-all');
+
+
+
+Route::get('products/{business}/{product}/enquiry', [ProductEnquiryController::class, 'create'])->name('public.products.enquiry.create');
+Route::post('products/{business}/{product}/enquiry', [ProductEnquiryController::class, 'store'])->middleware('throttle:5,1')->name('public.products.enquiry.store');
+
+
+Route::get('b/{slug}/reviews', [BusinessReviewController::class, 'publicIndex'])
+    ->name('public.business.reviews.index');
+
+
+
+Route::get('promoted/{promotion}', [GrowyaPaidPromotionController::class, 'click'])->middleware('throttle:60,1')->name('growya.promotions.click');
+
+// Authenticated explicit routes (no Route::resource)
+Route::middleware('auth')->group(function () {
+    Route::post('b/{slug}/reviews', [BusinessReviewController::class, 'store'])
+        ->middleware('throttle:5,1')->name('public.business.reviews.store');
+    Route::put('b/{slug}/reviews/{review}', [BusinessReviewController::class, 'update'])
+        ->middleware('throttle:5,1')->name('public.business.reviews.update');
+    Route::get('businesses/{business}/reviews', [BusinessReviewController::class, 'ownerIndex'])
+        ->name('businesses.reviews.index');
+    Route::patch('businesses/{business}/reviews/{review}/reply', [BusinessReviewController::class, 'reply'])
+        ->name('businesses.reviews.reply');
+    Route::get('admin/business-reviews', [AdminBusinessReviewController::class, 'index'])
+        ->name('admin.business-reviews.index');
+    Route::patch('admin/business-reviews/{review}/moderate', [AdminBusinessReviewController::class, 'update'])
+        ->name('admin.business-reviews.update');
+
+
+
+
+
+    Route::get('my-wishlist', [GrowyaWishlistController::class, 'mine'])->name('growya.wishlist.mine');
+    Route::post('my-wishlist/{type}/{id}', [GrowyaWishlistController::class, 'add'])->middleware('throttle:15,1')->whereNumber('id')->name('growya.wishlist.add');
+    Route::delete('my-wishlist/{type}/{id}', [GrowyaWishlistController::class, 'remove'])->whereNumber('id')->name('growya.wishlist.remove');
+    Route::get('businesses/{business}/wishlist-interests', [GrowyaWishlistController::class, 'seller'])->name('businesses.wishlist.index');
+    Route::patch('businesses/{business}/wishlist-interests/{interest}', [GrowyaWishlistController::class, 'update'])->name('businesses.wishlist.update');
+    Route::get('admin/wishlist-interests', [GrowyaWishlistController::class, 'admin'])->name('growya.admin.wishlist.index');
+    Route::patch('admin/wishlist-interests/{interest}', [GrowyaWishlistController::class, 'adminUpdate'])->name('growya.admin.wishlist.update');
+
+
+
+    Route::get('businesses/{business}/coupons', [GrowyaCouponController::class, 'index'])->name('businesses.coupons.index');
+    Route::get('businesses/{business}/coupons/create', [GrowyaCouponController::class, 'create'])->name('businesses.coupons.create');
+    Route::post('businesses/{business}/coupons', [GrowyaCouponController::class, 'store'])->name('businesses.coupons.store');
+    Route::get('businesses/{business}/coupons/{coupon}/edit', [GrowyaCouponController::class, 'edit'])->name('businesses.coupons.edit');
+    Route::patch('businesses/{business}/coupons/{coupon}', [GrowyaCouponController::class, 'update'])->name('businesses.coupons.update');
+
+
+
+    Route::get('admin/subscription-plans', [\App\Http\Controllers\GrowyaPlanController::class, 'index'])->name('growya.plans.index');
+    Route::post('admin/subscription-plans', [\App\Http\Controllers\GrowyaPlanController::class, 'store'])->name('growya.plans.store');
+    Route::patch('admin/subscription-plans/{plan}', [\App\Http\Controllers\GrowyaPlanController::class, 'update'])->name('growya.plans.update');
+    Route::get('admin/subscriptions', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'adminIndex'])->name('growya.subscriptions.admin');
+    Route::patch('admin/subscriptions/{subscription}/review', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'review'])->name('growya.subscriptions.review');
+    Route::get('businesses/{business}/subscriptions', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'index'])->name('growya.subscriptions.business');
+    Route::post('businesses/{business}/subscriptions', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'request'])->middleware('throttle:5,1')->name('growya.subscriptions.request');
+
+
+
+
+    Route::get('admin/subscription-plans/{plan}/limits', [GrowyaPlanEntitlementController::class, 'edit'])->name('growya.entitlements.edit');
+    Route::patch('admin/subscription-plans/{plan}/limits', [GrowyaPlanEntitlementController::class, 'update'])->name('growya.entitlements.update');
+    Route::get('businesses/{business}/plan-usage', [GrowyaPlanEntitlementController::class, 'usage'])->name('growya.entitlements.usage');
+
+
+
+
+    Route::get('admin/businesses/{business}/plan-overrides', [GrowyaBusinessPlanOverrideController::class, 'edit'])->name('growya.plan-overrides.edit');
+    Route::post('admin/businesses/{business}/plan-overrides', [GrowyaBusinessPlanOverrideController::class, 'save'])->name('growya.plan-overrides.save');
+    Route::delete('admin/businesses/{business}/plan-overrides/{key}', [GrowyaBusinessPlanOverrideController::class, 'remove'])->name('growya.plan-overrides.remove');
+
+
+
+    Route::get('admin/paid-promotion-packages', [GrowyaPaidPromotionController::class, 'packages'])->name('growya.promotions.packages');
+    Route::post('admin/paid-promotion-packages', [GrowyaPaidPromotionController::class, 'storePackage'])->name('growya.promotions.packages.store');
+    Route::patch('admin/paid-promotion-packages/{package}', [GrowyaPaidPromotionController::class, 'updatePackage'])->name('growya.promotions.packages.update');
+    Route::get('admin/paid-promotions', [GrowyaPaidPromotionController::class, 'adminIndex'])->name('growya.promotions.admin');
+    Route::patch('admin/paid-promotions/{promotion}', [GrowyaPaidPromotionController::class, 'review'])->name('growya.promotions.review');
+    Route::get('businesses/{business}/paid-promotions', [GrowyaPaidPromotionController::class, 'ownerIndex'])->name('growya.promotions.owner');
+    Route::post('businesses/{business}/paid-promotions', [GrowyaPaidPromotionController::class, 'request'])->middleware('throttle:5,1')->name('growya.promotions.owner.request');
+
+
+    Route::get('businesses/{business}/analytics', [GrowyaAnalyticsController::class, 'owner'])
+        ->name('growya.analytics.owner');
+    Route::get('businesses/{business}/analytics/export', [GrowyaAnalyticsController::class, 'ownerExport'])
+        ->name('growya.analytics.owner.export');
+    Route::get('admin/analytics', [GrowyaAnalyticsController::class, 'admin'])
+        ->name('growya.analytics.admin');
+    Route::get('admin/analytics/export', [GrowyaAnalyticsController::class, 'adminExport'])
+        ->name('growya.analytics.admin.export');
+});
+
+
+
+
+Route::middleware('auth')->group(function () {
+    Route::get(
+        'my-following',
+        [BusinessFollowController::class, 'index']
+    )->name('public.business.following');
+
+    Route::post(
+        'businesses/{business}/follow',
+        [BusinessFollowController::class, 'store']
+    )->name('public.business.follow');
+
+    Route::delete(
+        'businesses/{business}/follow',
+        [BusinessFollowController::class, 'destroy']
+    )->name('public.business.unfollow');
+});
+
+
+Route::get('/', [PublicHomeController::class, 'index'])->name('home');
+
+Route::get(
+    '/marketplace',
+    [PublicMarketplaceController::class, 'index']
+)->name('public.marketplace.index');
+
+
+Route::get(
+    'search',
+    [PublicGlobalSearchController::class, 'index']
+)->name('public.search.index');
+
+Route::get(
+    'search/suggestions',
+    [PublicGlobalSearchController::class, 'suggest']
+)->middleware('throttle:30,1')
+    ->name('public.search.suggest');
+
+
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get(
+        'dashboard',
+        [GrowyaDashboardController::class, 'index']
+    )->name('dashboard');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('business-applications', [GrowyaBusinessRequestController::class, 'index'])
+        ->name('growya.business-request.status');
+
+    Route::middleware(\App\Http\Middleware\GrowyaSuperAdminOnly::class)->group(function () {
+        Route::resource('roles', RoleController::class);
+        Route::delete('roles/{role}/permissions/{permission}', [RoleController::class, 'removePermission'])
+            ->name('roles.permissions.remove');
+
+        Route::get('permissions', [PermissionController::class, 'index'])->name('permissions.index');
+        Route::post('permissions/assign', [PermissionController::class, 'assign'])->name('permissions.assign');
+        Route::post('permissions/store', [PermissionController::class, 'store'])->name('permissions.store');
+        Route::delete('permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
+        Route::get('admin/access-control', [\App\Http\Controllers\GrowyaRoleMatrixController::class, 'index'])->name('growya.roles.matrix');
+        Route::patch('admin/access-control/roles/{role}', [\App\Http\Controllers\GrowyaRoleMatrixController::class, 'update'])->name('growya.roles.matrix.update');
+    });
+
+    Route::get('admin/user-roles', [GrowyaUserRoleController::class, 'index'])
+        ->name('growya.users.roles.index');
+    Route::patch('admin/user-roles/{user}', [GrowyaUserRoleController::class, 'update'])
+        ->name('growya.users.roles.update');
+
+    Route::get('admin/business-ownership', [GrowyaBusinessOwnershipController::class, 'index'])
+        ->name('growya.ownership.index');
+    Route::get('admin/business-ownership/{business}/edit', [GrowyaBusinessOwnershipController::class, 'edit'])
+        ->name('growya.ownership.edit');
+    Route::patch('admin/business-ownership/{business}', [GrowyaBusinessOwnershipController::class, 'update'])
+        ->middleware('throttle:10,1')->name('growya.ownership.update');
+
+    Route::get('/users', function () {
+        return view('users.index');
+    })->name('users.index');
+
+
+
+    Route::get('my-orders/{order}/payment', [GrowyaPaymentController::class, 'customerIndex'])->name('growya.payments.customer');
+    Route::post('my-orders/{order}/payment', [GrowyaPaymentController::class, 'submit'])->middleware('throttle:5,1')->name('growya.payments.submit');
+    Route::get('my-orders/{order}/payment/{submission}/proof', [GrowyaPaymentController::class, 'customerProof'])->name('growya.payments.customer-proof');
+    Route::get('businesses/{business}/payments', [GrowyaPaymentController::class, 'sellerIndex'])->name('businesses.payments.index');
+    Route::patch('businesses/{business}/orders/{order}/payment/{submission}/review', [GrowyaPaymentController::class, 'review'])->name('businesses.payments.review');
+    Route::get('businesses/{business}/orders/{order}/payment/{submission}/proof', [GrowyaPaymentController::class, 'proof'])->name('businesses.payments.proof');
+
+
+    Route::get('my-orders/{order}/returns', [GrowyaOrderReturnsController::class, 'customerIndex'])->name('growya.returns.customer');
+    Route::post('my-orders/{order}/returns', [GrowyaOrderReturnsController::class, 'submit'])->middleware('throttle:5,1')->name('growya.returns.submit');
+    Route::get('businesses/{business}/returns', [GrowyaOrderReturnsController::class, 'sellerIndex'])->name('businesses.returns.index');
+    Route::patch('businesses/{business}/returns/{returnRequest}/review', [GrowyaOrderReturnsController::class, 'review'])->name('businesses.returns.review');
+    Route::patch('businesses/{business}/returns/{returnRequest}/refund', [GrowyaOrderReturnsController::class, 'markRefunded'])->name('businesses.returns.refund');
+
+
+    Route::get('my-orders/{order}/tracking', [GrowyaDeliveryTrackingController::class, 'customer'])->name('growya.orders.tracking');
+    Route::get('businesses/{business}/delivery', [GrowyaDeliveryTrackingController::class, 'index'])->name('businesses.delivery.index');
+    Route::get('businesses/{business}/orders/{order}/delivery', [GrowyaDeliveryTrackingController::class, 'sellerShow'])->name('businesses.orders.delivery.show');
+    Route::patch('businesses/{business}/orders/{order}/delivery', [GrowyaDeliveryTrackingController::class, 'update'])->name('businesses.orders.delivery.update');
+
+
+    Route::get('shops/{business}/cart', [GrowyaCartCheckoutController::class, 'index'])->name('growya.cart.index');
+    Route::post('shops/{business}/cart', [GrowyaCartCheckoutController::class, 'add'])->name('growya.cart.add');
+    Route::patch('shops/{business}/cart/{item}', [GrowyaCartCheckoutController::class, 'update'])->name('growya.cart.update');
+    Route::delete('shops/{business}/cart/{item}', [GrowyaCartCheckoutController::class, 'remove'])->name('growya.cart.remove');
+    Route::get('shops/{business}/checkout', [GrowyaCartCheckoutController::class, 'checkoutForm'])->name('growya.checkout.form');
+    Route::post('shops/{business}/checkout', [GrowyaCartCheckoutController::class, 'place'])->name('growya.checkout.place');
+    Route::get('my-orders', [GrowyaCartCheckoutController::class, 'myOrders'])->name('growya.orders.mine');
+    Route::get('my-orders/{order}', [GrowyaCartCheckoutController::class, 'order'])->name('growya.orders.show');
+    Route::get('businesses/{business}/orders', [GrowyaBusinessOrderController::class, 'index'])->name('businesses.orders.index');
+    Route::get('businesses/{business}/orders/{order}', [GrowyaBusinessOrderController::class, 'show'])->name('businesses.orders.show');
+    Route::patch('businesses/{business}/orders/{order}/status', [GrowyaBusinessOrderController::class, 'status'])->name('businesses.orders.status');
+
+
+    Route::get('my-addresses', [GrowyaCustomerAddressController::class, 'index'])->name('growya.addresses.index');
+    Route::post('my-addresses', [GrowyaCustomerAddressController::class, 'store'])->name('growya.addresses.store');
+    Route::put('my-addresses/{address}', [GrowyaCustomerAddressController::class, 'update'])->name('growya.addresses.update');
+    Route::patch('my-addresses/{address}/default', [GrowyaCustomerAddressController::class, 'setDefault'])->name('growya.addresses.default');
+    Route::delete('my-addresses/{address}', [GrowyaCustomerAddressController::class, 'destroy'])->name('growya.addresses.destroy');
+
+
+
+    Route::get('businesses/{business}/product-enquiries', [ProductEnquiryController::class, 'index'])->name('businesses.product-enquiries.index');
+    Route::get('businesses/{business}/product-enquiries/{enquiry}', [ProductEnquiryController::class, 'show'])->name('businesses.product-enquiries.show');
+    Route::patch('businesses/{business}/product-enquiries/{enquiry}/status', [ProductEnquiryController::class, 'status'])->name('businesses.product-enquiries.status');
+    Route::post('businesses/{business}/product-enquiries/{enquiry}/notes', [ProductEnquiryController::class, 'note'])->name('businesses.product-enquiries.notes.store');
+    Route::patch('businesses/{business}/product-enquiries/{enquiry}/notes/{note}/complete', [ProductEnquiryController::class, 'complete'])->name('businesses.product-enquiries.notes.complete');
+
+
+    /*
+|--------------------------------------------------------------------------
+| Growya Business Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get('businesses', [BusinessController::class, 'index'])
+        ->name('businesses.index');
+
+    Route::get('businesses/create', [BusinessController::class, 'create'])
+        ->name('businesses.create');
+
+    Route::post('businesses', [BusinessController::class, 'store'])
+        ->name('businesses.store');
+
+    Route::get('businesses/{business}', [BusinessController::class, 'show'])
+        ->name('businesses.show');
+
+    Route::get('businesses/{business}/edit', [BusinessController::class, 'edit'])
+        ->name('businesses.edit');
+
+    Route::put('businesses/{business}', [BusinessController::class, 'update'])
+        ->name('businesses.update');
+
+    Route::delete('businesses/{business}', [BusinessController::class, 'destroy'])
+        ->name('businesses.destroy');
+
+
+
+    Route::get(
+        'businesses/{business}/hours',
+        [BusinessHourController::class, 'index']
+    )->name('businesses.hours.index');
+
+    Route::post(
+        'businesses/{business}/hours',
+        [BusinessHourController::class, 'store']
+    )->name('businesses.hours.store');
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Business Social Links
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/social-links',
+        [BusinessSocialLinkController::class, 'index']
+    )->name('businesses.social-links.index');
+
+    Route::post(
+        'businesses/{business}/social-links',
+        [BusinessSocialLinkController::class, 'store']
+    )->name('businesses.social-links.store');
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Growya Business Staff Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/staff',
+        [BusinessStaffController::class, 'index']
+    )->name('businesses.staff.index');
+
+    Route::post(
+        'businesses/{business}/staff',
+        [BusinessStaffController::class, 'store']
+    )->name('businesses.staff.store');
+
+    Route::put(
+        'businesses/{business}/staff/{member}',
+        [BusinessStaffController::class, 'update']
+    )->name('businesses.staff.update');
+
+    Route::delete(
+        'businesses/{business}/staff/{member}',
+        [BusinessStaffController::class, 'destroy']
+    )->name('businesses.staff.destroy');
+
+
+    Route::get('businesses/{business}/staff/history', [\App\Http\Controllers\BusinessStaffController::class, 'history'])
+        ->name('businesses.staff.history');
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Growya Category Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get('categories', [CategoryController::class, 'index'])
+        ->name('categories.index');
+
+    Route::get('categories/create', [CategoryController::class, 'create'])
+        ->name('categories.create');
+
+    Route::post('categories', [CategoryController::class, 'store'])
+        ->name('categories.store');
+
+    Route::get('categories/{category}/edit', [CategoryController::class, 'edit'])
+        ->name('categories.edit');
+
+    Route::put('categories/{category}', [CategoryController::class, 'update'])
+        ->name('categories.update');
+
+    Route::delete('categories/{category}', [CategoryController::class, 'destroy'])
+        ->name('categories.destroy');
+
+
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Product Bulk CSV Import / Export
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/bulk',
+        [ProductBulkController::class, 'index']
+    )->name('businesses.products.bulk.index');
+
+    Route::get(
+        'businesses/{business}/products/bulk/template',
+        [ProductBulkController::class, 'template']
+    )->name('businesses.products.bulk.template');
+
+    Route::post(
+        'businesses/{business}/products/bulk/import',
+        [ProductBulkController::class, 'import']
+    )->name('businesses.products.bulk.import');
+
+    Route::get(
+        'businesses/{business}/products/bulk/export',
+        [ProductBulkController::class, 'export']
+    )->name('businesses.products.bulk.export');
+
+    Route::get(
+        'businesses/{business}/products/bulk/errors',
+        [ProductBulkController::class, 'errorReport']
+    )->name('businesses.products.bulk.errors');
+
+
+
+
+
+
+
+
+    // Growya Products Management
+
+    Route::get(
+        'businesses/{business}/products',
+        [ProductController::class, 'index']
+    )->name('businesses.products.index');
+
+    Route::get(
+        'businesses/{business}/products/create',
+        [ProductController::class, 'create']
+    )->name('businesses.products.create');
+
+    Route::post(
+        'businesses/{business}/products',
+        [ProductController::class, 'store']
+    )->name('businesses.products.store');
+
+    Route::get(
+        'businesses/{business}/products/{product}',
+        [ProductController::class, 'show']
+    )->name('businesses.products.show');
+
+    Route::get(
+        'businesses/{business}/products/{product}/edit',
+        [ProductController::class, 'edit']
+    )->name('businesses.products.edit');
+
+    Route::put(
+        'businesses/{business}/products/{product}',
+        [ProductController::class, 'update']
+    )->name('businesses.products.update');
+
+    Route::delete(
+        'businesses/{business}/products/{product}',
+        [ProductController::class, 'destroy']
+    )->name('businesses.products.destroy');
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Product Gallery Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/{product}/gallery',
+        [ProductImageController::class, 'index']
+    )->name('businesses.products.gallery.index');
+
+    Route::post(
+        'businesses/{business}/products/{product}/gallery',
+        [ProductImageController::class, 'store']
+    )->name('businesses.products.gallery.store');
+
+    Route::put(
+        'businesses/{business}/products/{product}/gallery/{image}',
+        [ProductImageController::class, 'update']
+    )->name('businesses.products.gallery.update');
+
+    Route::post(
+        'businesses/{business}/products/{product}/gallery/{image}/featured',
+        [ProductImageController::class, 'featured']
+    )->name('businesses.products.gallery.featured');
+
+    Route::delete(
+        'businesses/{business}/products/{product}/gallery/{image}',
+        [ProductImageController::class, 'destroy']
+    )->name('businesses.products.gallery.destroy');
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Growya Product Variants
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/{product}/variants',
+        [ProductVariantController::class, 'index']
+    )->name('businesses.products.variants.index');
+
+    Route::post(
+        'businesses/{business}/products/{product}/variants',
+        [ProductVariantController::class, 'store']
+    )->name('businesses.products.variants.store');
+
+    Route::put(
+        'businesses/{business}/products/{product}/variants/{variant}',
+        [ProductVariantController::class, 'update']
+    )->name('businesses.products.variants.update');
+
+    Route::delete(
+        'businesses/{business}/products/{product}/variants/{variant}',
+        [ProductVariantController::class, 'destroy']
+    )->name('businesses.products.variants.destroy');
+
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Global Tags Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'tags',
+        [TagController::class, 'index']
+    )->name('tags.index');
+
+    Route::post(
+        'tags',
+        [TagController::class, 'store']
+    )->name('tags.store');
+
+    Route::put(
+        'tags/{tag}',
+        [TagController::class, 'update']
+    )->name('tags.update');
+
+    Route::delete(
+        'tags/{tag}',
+        [TagController::class, 'destroy']
+    )->name('tags.destroy');
+
+
+    /*
+|--------------------------------------------------------------------------
+| Product Tags Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/{product}/tags',
+        [ProductTagController::class, 'index']
+    )->name('businesses.products.tags.index');
+
+    Route::put(
+        'businesses/{business}/products/{product}/tags',
+        [ProductTagController::class, 'update']
+    )->name('businesses.products.tags.update');
+
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Global Attributes & Values
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'attributes',
+        [AttributeController::class, 'index']
+    )->name('attributes.index');
+
+    Route::post(
+        'attributes',
+        [AttributeController::class, 'store']
+    )->name('attributes.store');
+
+    Route::put(
+        'attributes/{attribute}',
+        [AttributeController::class, 'update']
+    )->name('attributes.update');
+
+    Route::delete(
+        'attributes/{attribute}',
+        [AttributeController::class, 'destroy']
+    )->name('attributes.destroy');
+
+    Route::post(
+        'attributes/{attribute}/values',
+        [AttributeController::class, 'storeValue']
+    )->name('attributes.values.store');
+
+    Route::put(
+        'attributes/{attribute}/values/{value}',
+        [AttributeController::class, 'updateValue']
+    )->name('attributes.values.update');
+
+    Route::delete(
+        'attributes/{attribute}/values/{value}',
+        [AttributeController::class, 'destroyValue']
+    )->name('attributes.values.destroy');
+
+
+    /*
+|--------------------------------------------------------------------------
+| Product Attribute Assignment
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/{product}/attributes',
+        [ProductAttributeController::class, 'index']
+    )->name('businesses.products.attributes.index');
+
+    Route::put(
+        'businesses/{business}/products/{product}/attributes',
+        [ProductAttributeController::class, 'update']
+    )->name('businesses.products.attributes.update');
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Product Variant Attribute Mapping
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/{product}/variants/{variant}/attributes',
+        [ProductVariantAttributeController::class, 'edit']
+    )->name('businesses.products.variants.attributes.edit');
+
+    Route::put(
+        'businesses/{business}/products/{product}/variants/{variant}/attributes',
+        [ProductVariantAttributeController::class, 'update']
+    )->name('businesses.products.variants.attributes.update');
+
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Growya Product Inventory
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/{product}/inventory',
+        [ProductInventoryController::class, 'index']
+    )->name('businesses.products.inventory.index');
+
+    Route::post(
+        'businesses/{business}/products/{product}/inventory',
+        [ProductInventoryController::class, 'store']
+    )->name('businesses.products.inventory.store');
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Product QR Code Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/products/{product}/qr',
+        [ProductQrCodeController::class, 'show']
+    )->name('businesses.products.qr.show');
+
+    Route::post(
+        'businesses/{business}/products/{product}/qr',
+        [ProductQrCodeController::class, 'generate']
+    )->name('businesses.products.qr.generate');
+
+    Route::get(
+        'businesses/{business}/products/{product}/qr/download',
+        [ProductQrCodeController::class, 'download']
+    )->name('businesses.products.qr.download');
+
+    Route::get(
+        'businesses/{business}/products/{product}/qr/print',
+        [ProductQrCodeController::class, 'print']
+    )->name('businesses.products.qr.print');
+
+    Route::post(
+        'businesses/{business}/products/qr/bulk-print',
+        [ProductQrCodeController::class, 'bulkPrint']
+    )->name('businesses.products.qr.bulk-print');
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Growya Services CRUD
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/services',
+        [ServiceController::class, 'index']
+    )->name('businesses.services.index');
+
+    Route::get(
+        'businesses/{business}/services/create',
+        [ServiceController::class, 'create']
+    )->name('businesses.services.create');
+
+    Route::post(
+        'businesses/{business}/services',
+        [ServiceController::class, 'store']
+    )->name('businesses.services.store');
+
+    Route::get(
+        'businesses/{business}/services/{service}',
+        [ServiceController::class, 'show']
+    )->name('businesses.services.show');
+
+    Route::get(
+        'businesses/{business}/services/{service}/edit',
+        [ServiceController::class, 'edit']
+    )->name('businesses.services.edit');
+
+    Route::put(
+        'businesses/{business}/services/{service}',
+        [ServiceController::class, 'update']
+    )->name('businesses.services.update');
+
+    Route::delete(
+        'businesses/{business}/services/{service}',
+        [ServiceController::class, 'destroy']
+    )->name('businesses.services.destroy');
+
+
+    /*
+|--------------------------------------------------------------------------
+| Service Gallery
+|--------------------------------------------------------------------------
+*/
+
+    Route::post(
+        'businesses/{business}/services/{service}/images',
+        [ServiceImageController::class, 'store']
+    )->name('businesses.services.images.store');
+
+    Route::patch(
+        'businesses/{business}/services/{service}/images/{image}/featured',
+        [ServiceImageController::class, 'featured']
+    )->name('businesses.services.images.featured');
+
+    Route::delete(
+        'businesses/{business}/services/{service}/images/{image}',
+        [ServiceImageController::class, 'destroy']
+    )->name('businesses.services.images.destroy');
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Business Service Enquiries
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/service-enquiries',
+        [ServiceEnquiryController::class, 'index']
+    )->name('businesses.service-enquiries.index');
+
+    Route::get(
+        'businesses/{business}/service-enquiries/{enquiry}',
+        [ServiceEnquiryController::class, 'show']
+    )->name('businesses.service-enquiries.show');
+
+    Route::patch(
+        'businesses/{business}/service-enquiries/{enquiry}/status',
+        [ServiceEnquiryController::class, 'updateStatus']
+    )->name('businesses.service-enquiries.status');
+
+
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Service Enquiry Follow-up Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/service-follow-ups',
+        [ServiceEnquiryFollowUpController::class, 'index']
+    )->name('businesses.service-follow-ups.index');
+
+    Route::post(
+        'businesses/{business}/service-enquiries/{enquiry}/follow-ups',
+        [ServiceEnquiryFollowUpController::class, 'store']
+    )->name('businesses.service-enquiries.follow-ups.store');
+
+    Route::patch(
+        'businesses/{business}/service-enquiries/{enquiry}/follow-ups/{followUp}/complete',
+        [ServiceEnquiryFollowUpController::class, 'complete']
+    )->name('businesses.service-enquiries.follow-ups.complete');
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Growya Service Appointments
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/appointments',
+        [AppointmentController::class, 'index']
+    )->name('businesses.appointments.index');
+
+    Route::get(
+        'businesses/{business}/appointments/create',
+        [AppointmentController::class, 'create']
+    )->name('businesses.appointments.create');
+
+    Route::post(
+        'businesses/{business}/appointments',
+        [AppointmentController::class, 'store']
+    )->name('businesses.appointments.store');
+
+    Route::get(
+        'businesses/{business}/appointments/{appointment}',
+        [AppointmentController::class, 'show']
+    )->name('businesses.appointments.show');
+
+    Route::patch(
+        'businesses/{business}/appointments/{appointment}/status',
+        [AppointmentController::class, 'updateStatus']
+    )->name('businesses.appointments.status');
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Business Gallery Management
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'businesses/{business}/gallery',
+        [BusinessGalleryController::class, 'index']
+    )->name('businesses.gallery.index');
+
+    Route::get(
+        'businesses/{business}/gallery/create',
+        [BusinessGalleryController::class, 'create']
+    )->name('businesses.gallery.create');
+
+    Route::post(
+        'businesses/{business}/gallery',
+        [BusinessGalleryController::class, 'store']
+    )->name('businesses.gallery.store');
+
+    Route::get(
+        'businesses/{business}/gallery/{gallery}/edit',
+        [BusinessGalleryController::class, 'edit']
+    )->name('businesses.gallery.edit');
+
+    Route::put(
+        'businesses/{business}/gallery/{gallery}',
+        [BusinessGalleryController::class, 'update']
+    )->name('businesses.gallery.update');
+
+    Route::delete(
+        'businesses/{business}/gallery/{gallery}',
+        [BusinessGalleryController::class, 'destroy']
+    )->name('businesses.gallery.destroy');
+
+
+
+
+
+    /*
+|--------------------------------------------------------------------------
+| Super Admin - Business Verification
+|--------------------------------------------------------------------------
+*/
+
+    Route::get(
+        'admin/business-verifications',
+        [BusinessVerificationController::class, 'index']
+    )->name('admin.business-verifications.index');
+
+    Route::get(
+        'admin/business-verifications/{business}',
+        [BusinessVerificationController::class, 'show']
+    )->name('admin.business-verifications.show');
+
+    Route::patch(
+        'admin/business-verifications/{business}/approve',
+        [BusinessVerificationController::class, 'approve']
+    )->name('admin.business-verifications.approve');
+
+    Route::patch(
+        'admin/business-verifications/{business}/reject',
+        [BusinessVerificationController::class, 'reject']
+    )->name('admin.business-verifications.reject');
+
+    Route::patch(
+        'admin/business-verifications/{business}/pending',
+        [BusinessVerificationController::class, 'pending']
+    )->name('admin.business-verifications.pending');
+
+
+
+
+
+    Route::get('businesses/{business}/offers', [BusinessOfferController::class, 'index'])->name('businesses.offers.index');
+    Route::get('businesses/{business}/offers/create', [BusinessOfferController::class, 'create'])->name('businesses.offers.create');
+    Route::post('businesses/{business}/offers', [BusinessOfferController::class, 'store'])->name('businesses.offers.store');
+    Route::get('businesses/{business}/offers/{offer}/edit', [BusinessOfferController::class, 'edit'])->name('businesses.offers.edit');
+    Route::put('businesses/{business}/offers/{offer}', [BusinessOfferController::class, 'update'])->name('businesses.offers.update');
+    Route::delete('businesses/{business}/offers/{offer}', [BusinessOfferController::class, 'destroy'])->name('businesses.offers.destroy');
+});
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Public Business Showroom
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    'b/{slug}',
+    [PublicBusinessController::class, 'home']
+)->name('public.business.home');
+
+Route::get(
+    'b/{slug}/products',
+    [PublicBusinessController::class, 'products']
+)->name('public.business.products');
+
+Route::get(
+    'b/{slug}/products/{productSlug}',
+    [PublicBusinessController::class, 'product']
+)->name('public.business.product');
+
+Route::get(
+    'b/{slug}/services',
+    [PublicBusinessController::class, 'services']
+)->name('public.business.services');
+
+Route::get(
+    'b/{slug}/services/{serviceSlug}',
+    [PublicBusinessController::class, 'service']
+)->name('public.business.service');
+
+Route::get(
+    'b/{slug}/gallery',
+    [PublicBusinessController::class, 'gallery']
+)->name('public.business.gallery');
+
+Route::get(
+    'b/{slug}/contact',
+    [PublicBusinessController::class, 'contact']
+)->name('public.business.contact');
+
+
+
+
+
+
+
+
+/*
+|--------------------------------------------------------------------------
+| Public Service Enquiries
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('throttle:5,1')->group(function () {
+
+    Route::get(
+        's/{business}/{service}/enquiry',
+        [PublicServiceEnquiryController::class, 'create']
+    )->name('public.services.enquiries.create');
+
+    Route::post(
+        's/{business}/{service}/enquiry',
+        [PublicServiceEnquiryController::class, 'store']
+    )->name('public.services.enquiries.store');
+});
+
+
+
+
+
+
+Route::get(
+    'p/{business}/{product}',
+    [PublicProductController::class, 'show']
+)->name('public.products.show');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::livewire('invitations/{invitation}/accept', 'pages::teams.accept-invitation')
+        ->name('invitations.accept');
+});
+
+require __DIR__ . '/settings.php';
