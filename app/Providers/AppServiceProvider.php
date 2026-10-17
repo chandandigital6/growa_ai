@@ -15,6 +15,7 @@ use App\Models\ServiceEnquiry;
 use App\Observers\GrowyaEventNotificationObserver;
 use App\Models\Order;
 use App\Observers\GrowyaOrderNotificationObserver;
+use App\Observers\GrowyaReferralBusinessObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -55,6 +56,7 @@ class AppServiceProvider extends ServiceProvider
 
         Review::observe(GrowyaEventNotificationObserver::class);
         Order::observe(GrowyaOrderNotificationObserver::class);
+        Business::observe(GrowyaReferralBusinessObserver::class);
     }
 
     /**

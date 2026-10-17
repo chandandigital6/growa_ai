@@ -28,12 +28,16 @@
 
         $businessMenu = [
             ['Overview', 'businesses.show', 'store', 'business.view'],
+            ['Customer CRM', 'growya.crm.index', 'users', 'business.view'],
+            ['Lead Insights', 'growya.lead-insights.owner', 'grid', 'business.view'],
             ['Customer messages', 'growya.chat.inbox', 'chat', 'chats.view'],
             ['KYC & Documents', 'growya.kyc.owner', 'shield', 'business.view'],
+            ['Subscription billing', 'growya.billing.owner', 'wallet', 'business.view'],
             ['Analytics & Reports', 'growya.analytics.owner', 'grid', 'business.view'],
             ['Coupons & Discounts', 'businesses.coupons.index', 'tag', 'business.update'],
             ['Plan usage', 'growya.entitlements.usage', 'chart', 'business.view'],
             ['Subscription plans', 'growya.subscriptions.business', 'wallet', 'business.view'],
+            ['Map Location', 'growya.nearby.location.edit', 'pin', 'business.update'],
             ['Paid promotions', 'growya.promotions.owner', 'tag', 'business.view'],
             ['Products', 'businesses.products.index', 'box', 'products.view'],
             ['Services', 'businesses.services.index', 'sparkles', 'services.view'],
@@ -54,6 +58,9 @@
         $adminMenu = [
             ['Business approvals', 'admin.business-verifications.index', 'admin.business-verifications.*', 'shield'],
             ['All businesses', 'businesses.index', 'businesses.index', 'store'],
+            ['Lead Insights', 'growya.lead-insights.admin', 'growya.lead-insights.admin*', 'grid'],
+            ['Referrals & Rewards', 'growya.referrals.admin', 'growya.referrals.admin', 'users'],
+            ['Subscription billing', 'growya.billing.admin', 'growya.billing.admin', 'wallet'],
             ['Chat moderation', 'growya.chat.reports', 'growya.chat.reports*', 'shield'],
             ['Business claims', 'growya.claims.admin', 'growya.claims.admin*', 'shield'],
             ['Business KYC Reviews', 'growya.kyc.admin', 'growya.kyc.admin*', 'shield'],
@@ -103,6 +110,17 @@
             </div>
         @endif
 
+
+        {{-- @if ($sidebarBusiness && Route::has('growya.nearby.location.edit') && $access->can($sidebarUser, $sidebarBusiness, 'business.update'))
+    <a
+        class="g-nav-item {{ request()->routeIs('growya.nearby.location.*') ? 'is-current' : '' }}"
+        href="{{ route('growya.nearby.location.edit', ['business' => $sidebarBusiness->id]) }}"
+        wire:navigate
+    >
+        <x-growya.icon name="pin" />
+        Map Location
+    </a>
+@endif --}}
         {{-- Workspace Navigation --}}
         <p class="g-sidebar-label">Workspace</p>
         <nav>
@@ -125,6 +143,15 @@
                 @if (request()->routeIs('growya.notifications.*')) aria-current="page" @endif wire:navigate>
                 <x-growya.icon name="bell" />Notifications
             </a>
+
+
+            @if (Route::has('growya.reminders.preferences'))
+                <a class="g-nav-item {{ request()->routeIs('growya.reminders.preferences') ? 'is-current' : '' }}"
+                    href="{{ route('growya.reminders.preferences') }}" wire:navigate>
+                    <x-growya.icon name="clock" />
+                    Reminder Preferences
+                </a>
+            @endif
 
             @if (Route::has('growya.support.index'))
                 <a class="g-nav-item {{ request()->routeIs('growya.support.*') ? 'is-current' : '' }}"
@@ -218,6 +245,14 @@
         @else
             <p class="g-sidebar-label">Your marketplace</p>
             <nav>
+
+                @if (Route::has('growya.referrals.mine'))
+                    <a class="g-nav-item {{ request()->routeIs('growya.referrals.mine') ? 'is-current' : '' }}"
+                        href="{{ route('growya.referrals.mine') }}" wire:navigate>
+                        <x-growya.icon name="users" />
+                        My Referrals
+                    </a>
+                @endif
                 @if (Route::has('growya.chat.mine'))
                     @php $chatCurrent = request()->routeIs('growya.chat.mine', 'growya.chat.show'); @endphp
                     <a class="g-nav-item {{ $chatCurrent ? 'is-current' : '' }}"

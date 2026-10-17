@@ -65,6 +65,18 @@ use App\Http\Controllers\GrowyaBusinessKycController;
 use App\Http\Controllers\GrowyaChatController;
 use App\Http\Controllers\GrowyaChatEnhancementController;
 use App\Http\Controllers\GrowyaBusinessClaimController;
+use App\Http\Controllers\GrowyaNearbyController;
+use App\Http\Controllers\GrowyaLeadInsightsController;
+use App\Http\Controllers\GrowyaBusinessCrmController;
+
+
+Route::get('nearby-businesses', [GrowyaNearbyController::class, 'index'])->name('growya.nearby.index');
+
+
+Route::get('my-referrals', [\App\Http\Controllers\GrowyaReferralController::class, 'mine'])->name('growya.referrals.mine');
+Route::get('admin/referrals', [\App\Http\Controllers\GrowyaReferralController::class, 'admin'])->name('growya.referrals.admin');
+Route::patch('admin/referrals/settings', [\App\Http\Controllers\GrowyaReferralController::class, 'settings'])->name('growya.referrals.settings');
+Route::post('/admin/referrals/{referral}/approve', [\App\Http\Controllers\GrowyaReferralController::class, 'approveBusinessReward'])->name('growya.referrals.approve');
 
 Route::get('b/{business:slug}/offers', [PublicOfferController::class, 'index'])->name('public.business.offers');
 
@@ -100,6 +112,43 @@ Route::get('promoted/{promotion}', [GrowyaPaidPromotionController::class, 'click
 
 // Authenticated explicit routes (no Route::resource)
 Route::middleware('auth')->group(function () {
+
+
+
+
+    Route::get(
+        'businesses/{business}/lead-insights',
+        [GrowyaLeadInsightsController::class, 'owner']
+    )->name('growya.lead-insights.owner');
+
+    Route::get(
+        'businesses/{business}/lead-insights/export',
+        [GrowyaLeadInsightsController::class, 'ownerExport']
+    )->name('growya.lead-insights.owner.export');
+
+    Route::get(
+        'admin/lead-insights',
+        [GrowyaLeadInsightsController::class, 'admin']
+    )->name('growya.lead-insights.admin');
+
+    Route::get(
+        'admin/lead-insights/export',
+        [GrowyaLeadInsightsController::class, 'adminExport']
+    )->name('growya.lead-insights.admin.export');
+
+
+
+    Route::get('businesses/{business}/crm', [GrowyaBusinessCrmController::class, 'index'])->name('growya.crm.index');
+    Route::get('businesses/{business}/crm/create', [GrowyaBusinessCrmController::class, 'create'])->name('growya.crm.create');
+    Route::post('businesses/{business}/crm', [GrowyaBusinessCrmController::class, 'store'])->name('growya.crm.store');
+    Route::get('businesses/{business}/crm/export', [GrowyaBusinessCrmController::class, 'export'])->name('growya.crm.export');
+    Route::post('businesses/{business}/crm/import', [GrowyaBusinessCrmController::class, 'import'])->name('growya.crm.import');
+    Route::get('businesses/{business}/crm/{contact}', [GrowyaBusinessCrmController::class, 'show'])->name('growya.crm.show');
+    Route::get('businesses/{business}/crm/{contact}/edit', [GrowyaBusinessCrmController::class, 'edit'])->name('growya.crm.edit');
+    Route::patch('businesses/{business}/crm/{contact}', [GrowyaBusinessCrmController::class, 'update'])->name('growya.crm.update');
+    Route::post('businesses/{business}/crm/{contact}/activities', [GrowyaBusinessCrmController::class, 'note'])->name('growya.crm.note');
+
+
     Route::post('b/{slug}/reviews', [BusinessReviewController::class, 'store'])
         ->middleware('throttle:5,1')->name('public.business.reviews.store');
     Route::put('b/{slug}/reviews/{review}', [BusinessReviewController::class, 'update'])
@@ -114,6 +163,11 @@ Route::middleware('auth')->group(function () {
         ->name('admin.business-reviews.update');
 
 
+    Route::get('businesses/{business}/map-location', [GrowyaNearbyController::class, 'edit'])->name('growya.nearby.location.edit');
+    Route::patch('businesses/{business}/map-location', [GrowyaNearbyController::class, 'update'])->name('growya.nearby.location.update');
+
+    Route::get('my-reminder-preferences', [\App\Http\Controllers\GrowyaReminderPreferenceController::class, 'edit'])->name('growya.reminders.preferences');
+    Route::patch('my-reminder-preferences', [\App\Http\Controllers\GrowyaReminderPreferenceController::class, 'update'])->name('growya.reminders.preferences.update');
 
 
 
@@ -212,13 +266,13 @@ Route::middleware('auth')->group(function () {
 
 
     Route::patch('messages/{thread}/assign', [GrowyaChatEnhancementController::class, 'assign'])->name('growya.chat.assign');
-Route::patch('messages/{thread}/block', [GrowyaChatEnhancementController::class, 'block'])->name('growya.chat.block');
-Route::post('messages/{thread}/report', [GrowyaChatEnhancementController::class, 'report'])->middleware('throttle:5,1')->name('growya.chat.report');
-Route::patch('messages/{thread}/followup', [GrowyaChatEnhancementController::class, 'followup'])->name('growya.chat.followup');
-Route::get('messages/{thread}/activity', [GrowyaChatEnhancementController::class, 'activity'])->name('growya.chat.activity');
-Route::get('admin/chat-reports', [GrowyaChatEnhancementController::class, 'reports'])->name('growya.chat.reports');
-Route::patch('admin/chat-reports/{report}', [GrowyaChatEnhancementController::class, 'review'])->name('growya.chat.reports.review');
-Route::get('my-messages/unread-count', [GrowyaChatEnhancementController::class, 'unread'])->middleware('throttle:15,1')->name('growya.chat.unread');
+    Route::patch('messages/{thread}/block', [GrowyaChatEnhancementController::class, 'block'])->name('growya.chat.block');
+    Route::post('messages/{thread}/report', [GrowyaChatEnhancementController::class, 'report'])->middleware('throttle:5,1')->name('growya.chat.report');
+    Route::patch('messages/{thread}/followup', [GrowyaChatEnhancementController::class, 'followup'])->name('growya.chat.followup');
+    Route::get('messages/{thread}/activity', [GrowyaChatEnhancementController::class, 'activity'])->name('growya.chat.activity');
+    Route::get('admin/chat-reports', [GrowyaChatEnhancementController::class, 'reports'])->name('growya.chat.reports');
+    Route::patch('admin/chat-reports/{report}', [GrowyaChatEnhancementController::class, 'review'])->name('growya.chat.reports.review');
+    Route::get('my-messages/unread-count', [GrowyaChatEnhancementController::class, 'unread'])->middleware('throttle:15,1')->name('growya.chat.unread');
 
 
 
@@ -232,6 +286,16 @@ Route::get('my-messages/unread-count', [GrowyaChatEnhancementController::class, 
     Route::get('business-claims/{claim}/documents/{document}', [GrowyaBusinessClaimController::class, 'document'])->name('growya.claims.document');
     Route::get('admin/business-claims', [GrowyaBusinessClaimController::class, 'admin'])->name('growya.claims.admin');
     Route::patch('admin/business-claims/{claim}/review', [GrowyaBusinessClaimController::class, 'review'])->name('growya.claims.review');
+
+
+
+
+    Route::get('admin/subscription-billing', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'adminIndex'])->name('growya.billing.admin');
+    Route::post('admin/subscription-billing/payments/{payment}', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'issue'])->middleware('throttle:10,1')->name('growya.billing.issue');
+    Route::get('admin/subscription-billing/export', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'export'])->name('growya.billing.export');
+    Route::get('businesses/{business}/billing', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'ownerIndex'])->name('growya.billing.owner');
+    Route::get('subscription-billing/{document}', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'show'])->name('growya.billing.show');
+    Route::get('subscription-billing/{document}/pdf', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'pdf'])->name('growya.billing.pdf');
 });
 
 
