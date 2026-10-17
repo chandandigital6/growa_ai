@@ -61,6 +61,13 @@
             </div>
         </div>
 
+        <a
+    href="{{ route('growya.crm.advanced.show', [$business, $customer->id]) }}"
+    class="inline-flex rounded-lg bg-emerald-700 px-4 py-2 text-white"
+>
+    View Customer 360°
+</a>
+
         <h2 class="text-xl font-bold">Add Activity</h2>
         <form method="POST" action="{{ route('growya.crm.note', [$business, $customer->id]) }}"
             class="space-y-3 rounded-xl border p-5 dark:border-zinc-700">

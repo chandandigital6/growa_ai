@@ -2,6 +2,8 @@
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -11,3 +13,12 @@ Artisan::command('inspire', function () {
 \Illuminate\Support\Facades\Schedule::command(
     'growya:send-reminders'
 )->dailyAt('09:00')->withoutOverlapping();
+
+
+Schedule::command('growya:crm-sync --limit=20000')
+    ->hourly()
+    ->withoutOverlapping();
+
+Schedule::command('growya:crm-reminders')
+    ->dailyAt('09:15')
+    ->withoutOverlapping();

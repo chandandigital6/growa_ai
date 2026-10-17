@@ -68,6 +68,11 @@ use App\Http\Controllers\GrowyaBusinessClaimController;
 use App\Http\Controllers\GrowyaNearbyController;
 use App\Http\Controllers\GrowyaLeadInsightsController;
 use App\Http\Controllers\GrowyaBusinessCrmController;
+use App\Http\Controllers\GrowyaCrmAdvancedController;
+use App\Http\Controllers\GrowyaCrmStaffController;
+use App\Http\Controllers\GrowyaCrmIncentiveController;
+use App\Http\Controllers\GrowyaFinanceController;
+
 
 
 Route::get('nearby-businesses', [GrowyaNearbyController::class, 'index'])->name('growya.nearby.index');
@@ -110,10 +115,53 @@ Route::get('b/{slug}/reviews', [BusinessReviewController::class, 'publicIndex'])
 
 Route::get('promoted/{promotion}', [GrowyaPaidPromotionController::class, 'click'])->middleware('throttle:60,1')->name('growya.promotions.click');
 
+
 // Authenticated explicit routes (no Route::resource)
 Route::middleware('auth')->group(function () {
 
 
+
+
+Route::get('businesses/{business}/finance', [GrowyaFinanceController::class,'index'])->name('growya.finance.index');
+Route::post('businesses/{business}/finance/categories', [GrowyaFinanceController::class,'storeCategory'])->name('growya.finance.categories.store');
+Route::post('businesses/{business}/finance', [GrowyaFinanceController::class,'store'])->name('growya.finance.store');
+Route::patch('businesses/{business}/finance/{entry}', [GrowyaFinanceController::class,'update'])->name('growya.finance.update');
+Route::delete('businesses/{business}/finance/{entry}', [GrowyaFinanceController::class,'destroy'])->name('growya.finance.destroy');
+Route::get('businesses/{business}/finance/export', [GrowyaFinanceController::class,'export'])->name('growya.finance.export');
+
+
+
+
+Route::get('businesses/{business}/crm-incentives', [GrowyaCrmIncentiveController::class,'index'])->name('growya.crm.incentives.index');
+Route::get('businesses/{business}/crm-incentives/report', [GrowyaCrmIncentiveController::class,'report'])->name('growya.crm.incentives.report');
+Route::get('businesses/{business}/crm-incentives/export', [GrowyaCrmIncentiveController::class,'export'])->name('growya.crm.incentives.export');
+Route::post('businesses/{business}/crm-incentives/rules', [GrowyaCrmIncentiveController::class,'rule'])->name('growya.crm.incentives.rule');
+Route::patch('businesses/{business}/crm-incentives/rules/{rule}/toggle', [GrowyaCrmIncentiveController::class,'toggleRule'])->name('growya.crm.incentives.rule.toggle');
+Route::post('businesses/{business}/crm-incentives/claims', [GrowyaCrmIncentiveController::class,'claim'])->name('growya.crm.incentives.claim');
+Route::patch('businesses/{business}/crm-incentives/claims/{claim}/review', [GrowyaCrmIncentiveController::class,'review'])->name('growya.crm.incentives.review');
+Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaCrmIncentiveController::class,'pay'])->name('growya.crm.incentives.pay');
+
+
+
+
+
+    Route::get('businesses/{business}/crm-staff', [GrowyaCrmStaffController::class, 'dashboard'])->name('growya.crm.staff.dashboard');
+    Route::get('businesses/{business}/crm-staff/report', [GrowyaCrmStaffController::class, 'report'])->name('growya.crm.staff.report');
+    Route::post('businesses/{business}/crm-staff/targets', [GrowyaCrmStaffController::class, 'target'])->name('growya.crm.staff.target');
+    Route::get('businesses/{business}/crm-staff/{contact}', [GrowyaCrmStaffController::class, 'show'])->name('growya.crm.staff.show');
+    Route::patch('businesses/{business}/crm-staff/{contact}/assign', [GrowyaCrmStaffController::class, 'assign'])->name('growya.crm.staff.assign');
+    Route::patch('businesses/{business}/crm-staff/{contact}/progress', [GrowyaCrmStaffController::class, 'progress'])->name('growya.crm.staff.progress');
+    Route::post('businesses/{business}/crm-staff/{contact}/activities', [GrowyaCrmStaffController::class, 'activity'])->name('growya.crm.staff.activity');
+
+    Route::get('businesses/{business}/crm-kanban', [\App\Http\Controllers\GrowyaCrmKanbanController::class, 'index'])->name('growya.crm.kanban.index');
+    Route::patch('businesses/{business}/crm-kanban/{contact}', [\App\Http\Controllers\GrowyaCrmKanbanController::class, 'update'])->name('growya.crm.kanban.update');
+
+
+
+    Route::get(
+        'businesses/{business}/crm/{contact}/360',
+        [GrowyaCrmAdvancedController::class, 'show']
+    )->name('growya.crm.advanced.show');
 
 
     Route::get(

@@ -211,6 +211,43 @@
                             <x-growya.icon name="users" />Staff management
                         </a>
                     @endif
+
+
+                    @if (Route::has('growya.crm.staff.dashboard'))
+                        @php $staffCrmCurrent = request()->routeIs('growya.crm.staff.*'); @endphp
+                        <a class="g-nav-item {{ $staffCrmCurrent ? 'is-current' : '' }}"
+                            href="{{ route('growya.crm.staff.dashboard', $sidebarBusiness) }}"
+                            @if ($staffCrmCurrent) aria-current="page" @endif wire:navigate>
+                            <x-growya.icon name="users" />Staff CRM
+                        </a>
+                    @endif
+
+                    @if (isset($sidebarBusiness) && $sidebarBusiness)
+                        <a class="g-nav-item {{ request()->routeIs('growya.crm.kanban.*') ? 'is-current' : '' }}"
+                            href="{{ route('growya.crm.kanban.index', ['business' => $sidebarBusiness->id]) }}"
+                            wire:navigate>
+                            <x-growya.icon name="grid" />
+                            CRM Kanban
+                        </a>
+                    @endif
+
+                    @if (Route::has('growya.crm.incentives.index'))
+                        @php $incentivesCurrent = request()->routeIs('growya.crm.incentives.*'); @endphp
+                        <a class="g-nav-item {{ $incentivesCurrent ? 'is-current' : '' }}"
+                            href="{{ route('growya.crm.incentives.index', $sidebarBusiness) }}"
+                            @if ($incentivesCurrent) aria-current="page" @endif wire:navigate>
+                            <x-growya.icon name="wallet" />CRM Incentives
+                        </a>
+                    @endif
+                    @if (Route::has('growya.finance.index') && ($isSuperAdmin || $isBusinessOwner))
+                        @php $financeCurrent = request()->routeIs('growya.finance.*'); @endphp
+                        <a class="g-nav-item {{ $financeCurrent ? 'is-current' : '' }}"
+                            href="{{ route('growya.finance.index', $sidebarBusiness) }}"
+                            @if ($financeCurrent) aria-current="page" @endif wire:navigate>
+                            <x-growya.icon name="wallet" />Business Finance
+                        </a>
+                    @endif
+
                 </nav>
             @else
                 <p class="g-sidebar-note" style="padding: 0 1rem; font-size: .8rem; opacity: .7;">
@@ -320,8 +357,9 @@
                     <x-growya.icon name="globe" />Explore marketplace
                     <x-growya.icon name="arrow-up-right" class="ml-auto" />
                 </a>
-                <a class="g-nav-item {{ $isAccountSettings ? 'is-current' : '' }}" href="{{ route('profile.edit') }}"
-                    @if ($isAccountSettings) aria-current="page" @endif wire:navigate>
+                <a class="g-nav-item {{ $isAccountSettings ? 'is-current' : '' }}"
+                    href="{{ route('profile.edit') }}" @if ($isAccountSettings) aria-current="page" @endif
+                    wire:navigate>
                     <x-growya.icon name="settings" />Account settings
                 </a>
             </nav>
