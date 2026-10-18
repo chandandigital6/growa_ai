@@ -152,5 +152,8 @@ class GrowyaDemoSeeder extends Seeder
                 ]);
             }
         }
+
+        // Tags, attributes, values, product mappings and demo variants.
+        $this->call(GrowyaDemoProductCatalogSeeder::class);
     }
 }
