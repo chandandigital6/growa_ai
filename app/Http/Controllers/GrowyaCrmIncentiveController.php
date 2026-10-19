@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Services\BusinessAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -12,21 +13,22 @@ class GrowyaCrmIncentiveController extends Controller
 {
     private function manager(Request $request, Business $business): bool
     {
-        $user = $request->user();
-        return $user && ($user->hasRole('super_admin', 'web') ||
-            (($user->status === 'active') && (int) $business->owner_id === (int) $user->id && $business->status === 'active'));
+        return app(BusinessAccessService::class)->can($request->user(), $business, 'incentives.manage');
     }
 
     private function access(Request $request, Business $business, bool $managerOnly = false): bool
     {
         abort_unless($request->user() && $request->user()->status === 'active', 403);
         $manager = $this->manager($request, $business);
-        if ($manager) return true;
+        if ($manager) {
+            return true;
+        }
         abort_if($managerOnly, 403);
         abort_unless($business->status === 'active' && $business->verification_status === 'approved', 403);
         abort_unless(DB::table('business_users')->where('business_id', $business->id)
             ->where('user_id', $request->user()->id)->where('is_active', true)->exists(), 403);
-        abort_unless(app(\App\Services\BusinessAccessService::class)->can($request->user(), $business, 'business.view'), 403);
+        abort_unless(app(BusinessAccessService::class)->can($request->user(), $business, 'incentives.view'), 403);
+
         return false;
     }
 
@@ -47,7 +49,7 @@ class GrowyaCrmIncentiveController extends Controller
             'action' => $action,
             'note' => $note,
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
     }
 
@@ -63,7 +65,9 @@ class GrowyaCrmIncentiveController extends Controller
             })
             ->where('c.business_id', $business->id)
             ->select('c.*', 'u.name as staff_name', 'lead.name as contact_name');
-        if (!$manager) $q->where('c.staff_user_id', $request->user()->id);
+        if (! $manager) {
+            $q->where('c.staff_user_id', $request->user()->id);
+        }
         if ($manager && $request->filled('staff_id')) {
             $id = $request->integer('staff_id');
             abort_unless($staff->contains('id', $id), 422);
@@ -75,12 +79,13 @@ class GrowyaCrmIncentiveController extends Controller
         }
         $claims = (clone $q)->orderByDesc('c.id')->paginate(25)->withQueryString();
         $summary = DB::table('growya_crm_incentive_claims')->where('business_id', $business->id)
-            ->when(!$manager, fn($q) => $q->where('staff_user_id', $request->user()->id))
+            ->when(! $manager, fn ($q) => $q->where('staff_user_id', $request->user()->id))
             ->selectRaw('status, COUNT(*) as total, COALESCE(SUM(incentive_amount),0) as amount')
             ->groupBy('status')->get()->keyBy('status');
         $audits = $manager ? DB::table('growya_crm_incentive_audits as a')
             ->leftJoin('users as u', 'u.id', '=', 'a.actor_id')->where('a.business_id', $business->id)
             ->select('a.*', 'u.name as actor_name')->orderByDesc('a.id')->limit(20)->get() : collect();
+
         return view('growya-crm-incentives.index', compact('business', 'manager', 'staff', 'rules', 'claims', 'summary', 'audits'));
     }
 
@@ -93,10 +98,11 @@ class GrowyaCrmIncentiveController extends Controller
             'calculation' => ['required', Rule::in(['fixed', 'percentage'])],
             'amount' => ['required', 'numeric', 'gt:0', 'max:1000000'],
         ]);
-        if ($data['calculation'] === 'percentage' && (float)$data['amount'] > 100) {
+        if ($data['calculation'] === 'percentage' && (float) $data['amount'] > 100) {
             return back()->withErrors(['amount' => 'Percentage cannot exceed 100.'])->withInput();
         }
         DB::table('growya_crm_incentive_rules')->insert([...$data, 'business_id' => $business->id, 'active' => true, 'created_at' => now(), 'updated_at' => now()]);
+
         return back()->with('success', 'Incentive rule added.');
     }
 
@@ -106,8 +112,9 @@ class GrowyaCrmIncentiveController extends Controller
         DB::transaction(function () use ($business, $rule) {
             $r = DB::table('growya_crm_incentive_rules')->where('business_id', $business->id)->where('id', $rule)->lockForUpdate()->first();
             abort_unless($r, 404);
-            DB::table('growya_crm_incentive_rules')->where('id', $r->id)->update(['active' => !$r->active, 'updated_at' => now()]);
+            DB::table('growya_crm_incentive_rules')->where('id', $r->id)->update(['active' => ! $r->active, 'updated_at' => now()]);
         });
+
         return back()->with('success', 'Rule status updated.');
     }
 
@@ -120,18 +127,18 @@ class GrowyaCrmIncentiveController extends Controller
             'contact_id' => ['nullable', 'integer'],
             'base_amount' => ['nullable', 'numeric', 'min:0', 'max:999999999999'],
             'source_reference' => ['nullable', 'string', 'max:160'],
-            'note' => ['nullable', 'string', 'max:2000']
+            'note' => ['nullable', 'string', 'max:2000'],
         ]);
-        abort_unless($this->staff($business)->contains('id', (int)$data['staff_user_id']), 422, 'Staff must be an active business member.');
+        abort_unless($this->staff($business)->contains('id', (int) $data['staff_user_id']), 422, 'Staff must be an active business member.');
         DB::transaction(function () use ($request, $business, $data) {
             $rule = DB::table('growya_crm_incentive_rules')->where('business_id', $business->id)
                 ->where('id', $data['rule_id'])->where('active', true)->lockForUpdate()->first();
             abort_unless($rule, 422, 'Active rule not found.');
             $contact = null;
-            if (!empty($data['contact_id'])) {
+            if (! empty($data['contact_id'])) {
                 $contact = DB::table('growya_crm_contacts')->where('business_id', $business->id)->where('id', $data['contact_id'])->first();
                 abort_unless($contact, 422, 'Contact does not belong to this business.');
-                abort_unless((int)$contact->assigned_to === (int)$data['staff_user_id'], 422, 'Contact is not assigned to this staff member.');
+                abort_unless((int) $contact->assigned_to === (int) $data['staff_user_id'], 422, 'Contact is not assigned to this staff member.');
             }
             if ($rule->basis === 'crm_conversion') {
                 abort_unless($contact && $contact->status === 'converted', 422, 'An assigned converted CRM contact is required.');
@@ -144,7 +151,7 @@ class GrowyaCrmIncentiveController extends Controller
             }
             if ($rule->basis === 'manually_verified_sale') {
                 abort_unless(
-                    filled($data['source_reference'] ?? null) && isset($data['base_amount']) && (float)$data['base_amount'] > 0,
+                    filled($data['source_reference'] ?? null) && isset($data['base_amount']) && (float) $data['base_amount'] > 0,
                     422,
                     'Payment reference and positive verified paid amount are required.'
                 );
@@ -152,9 +159,11 @@ class GrowyaCrmIncentiveController extends Controller
                     ->where('basis', 'manually_verified_sale')->where('source_reference', $data['source_reference'])
                     ->whereIn('status', ['pending', 'approved', 'paid'])->exists(), 422, 'This payment reference already has an active claim.');
             }
-            if ($rule->calculation === 'percentage') abort_unless(isset($data['base_amount']) && (float)$data['base_amount'] > 0, 422, 'Percentage rule requires a positive base amount.');
-            $base = isset($data['base_amount']) ? round((float)$data['base_amount'], 2) : null;
-            $amount = $rule->calculation === 'fixed' ? (float)$rule->amount : round($base * (float)$rule->amount / 100, 2);
+            if ($rule->calculation === 'percentage') {
+                abort_unless(isset($data['base_amount']) && (float) $data['base_amount'] > 0, 422, 'Percentage rule requires a positive base amount.');
+            }
+            $base = isset($data['base_amount']) ? round((float) $data['base_amount'], 2) : null;
+            $amount = $rule->calculation === 'fixed' ? (float) $rule->amount : round($base * (float) $rule->amount / 100, 2);
             abort_unless($amount > 0 && $amount <= 999999999999, 422);
             $claim = DB::table('growya_crm_incentive_claims')->insertGetId([
                 'business_id' => $business->id,
@@ -171,10 +180,11 @@ class GrowyaCrmIncentiveController extends Controller
                 'note' => $data['note'] ?? null,
                 'created_by' => $request->user()->id,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
             $this->audit($business, $claim, $request, 'created', 'Claim created; awaiting owner verification and approval.');
         }, 3);
+
         return back()->with('success', 'Claim created as pending. Verify supporting evidence before approval.');
     }
 
@@ -194,10 +204,11 @@ class GrowyaCrmIncentiveController extends Controller
                 'status' => $data['decision'] === 'approve' ? 'approved' : 'rejected',
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
             $this->audit($business, $claim, $request, $data['decision'] === 'approve' ? 'approved' : 'rejected', $data['note'] ?? null);
         }, 3);
+
         return back()->with('success', 'Claim reviewed.');
     }
 
@@ -213,10 +224,11 @@ class GrowyaCrmIncentiveController extends Controller
                 'status' => 'paid',
                 'payment_reference' => $data['payment_reference'],
                 'paid_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
             $this->audit($business, $claim, $request, 'paid', $data['note'] ?? null);
         }, 3);
+
         return back()->with('success', 'Claim marked paid (manual payment record).');
     }
 
@@ -235,8 +247,9 @@ class GrowyaCrmIncentiveController extends Controller
                 ->where('actor_id', $s->id)->whereBetween('created_at', [$from, $to]);
             $claims = DB::table('growya_crm_incentive_claims')->where('business_id', $business->id)
                 ->where('staff_user_id', $s->id)->whereBetween('created_at', [$from, $to]);
+
             // Converted counts below are a CURRENT STATUS snapshot, not historic conversion dates.
-            return (object)[
+            return (object) [
                 'id' => $s->id,
                 'name' => $s->name,
                 'calls' => (clone $activities)->where('type', 'call')->count(),
@@ -248,6 +261,7 @@ class GrowyaCrmIncentiveController extends Controller
                 'paid' => (clone $claims)->where('status', 'paid')->sum('incentive_amount'),
             ];
         });
+
         return view('growya-crm-incentives.report', compact('business', 'reports', 'from', 'to'));
     }
 
@@ -268,13 +282,14 @@ class GrowyaCrmIncentiveController extends Controller
                 'c.created_at',
                 'c.paid_at'
             );
+
         return response()->streamDownload(function () use ($q) {
             $h = fopen('php://output', 'w');
             fputcsv($h, ['ID', 'Staff', 'Basis', 'Status', 'Incentive Amount', 'Base Amount', 'Source Reference', 'Payment Reference', 'Created', 'Paid']);
             foreach ($q->cursor() as $r) {
-                fputcsv($h, [(string)$r->id, $r->staff, $r->basis, $r->status, $r->incentive_amount, $r->base_amount, $r->source_reference, $r->payment_reference, $r->created_at, $r->paid_at]);
+                fputcsv($h, [(string) $r->id, $r->staff, $r->basis, $r->status, $r->incentive_amount, $r->base_amount, $r->source_reference, $r->payment_reference, $r->created_at, $r->paid_at]);
             }
             fclose($h);
-        }, 'growya-crm-incentives-' . $business->id . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }, 'growya-crm-incentives-'.$business->id.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

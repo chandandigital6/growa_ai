@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable([
@@ -27,12 +28,15 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasTeams, Notifiable, TwoFactorAuthenticatable;
+    protected $guard_name = 'web';
 
+    protected $attributes = ['status' => 'active', 'user_type' => 'customer'];
 
+    use HasApiTokens, HasFactory, HasTeams, Notifiable, TwoFactorAuthenticatable;
     use HasRoles {
         HasTeams::teams insteadof HasRoles;
     }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -59,37 +63,34 @@ class User extends Authenticatable
             ->implode('');
     }
 
+    public function ownedBusinesses()
+    {
+        return $this->hasMany(
+            Business::class,
+            'owner_id'
+        );
+    }
 
+    public function businessMemberships()
+    {
+        return $this->hasMany(
+            BusinessUser::class,
+            'user_id'
+        );
+    }
 
-public function ownedBusinesses()
-{
-    return $this->hasMany(
-        \App\Models\Business::class,
-        'owner_id'
-    );
-}
-
-public function businessMemberships()
-{
-    return $this->hasMany(
-        \App\Models\BusinessUser::class,
-        'user_id'
-    );
-}
-
-public function businesses()
-{
-    return $this->belongsToMany(
-        \App\Models\Business::class,
-        'business_users'
-    )
-    ->withPivot([
-        'id',
-        'role',
-        'is_active',
-        'joined_at'
-    ])
-    ->withTimestamps();
-}
-
+    public function businesses()
+    {
+        return $this->belongsToMany(
+            Business::class,
+            'business_users'
+        )
+            ->withPivot([
+                'id',
+                'role',
+                'is_active',
+                'joined_at',
+            ])
+            ->withTimestamps();
+    }
 }

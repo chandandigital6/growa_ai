@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Business;
 use App\Models\BusinessGallery;
 use App\Services\BusinessAccessService;
+use App\Services\GrowyaPlanLimitService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\File;
@@ -56,7 +58,7 @@ class BusinessGalleryController extends Controller
     {
         $this->authorizeBusiness(
             $business,
-            'services.view'
+            'gallery.view'
         );
 
         $request->validate([
@@ -116,7 +118,7 @@ class BusinessGalleryController extends Controller
     {
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'gallery.manage'
         );
 
         return view('businesses.gallery.form', [
@@ -134,7 +136,7 @@ class BusinessGalleryController extends Controller
     {
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'gallery.manage'
         );
 
         $data = $request->validate([
@@ -172,23 +174,23 @@ class BusinessGalleryController extends Controller
         ]);
 
         $path = $request->file('file')->store(
-            'business-gallery/' . $business->id,
+            'business-gallery/'.$business->id,
             'public'
         );
 
         try {
-            \Illuminate\Support\Facades\DB::transaction(function () use ($business, $data, $path) {
-                \App\Models\Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
-                app(\App\Services\GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_gallery');
+            DB::transaction(function () use ($business, $data, $path) {
+                Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
+                app(GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_gallery');
                 BusinessGallery::create([
-                'business_id' => $business->id,
-                'media_type' => $data['media_type'],
-                'file_url' => $path,
-                'thumbnail' => null,
-                'title' => $data['title'] ?? null,
-                'description' => $data['description'] ?? null,
-                'sort_order' => $data['sort_order'],
-                'is_active' => $data['is_active'],
+                    'business_id' => $business->id,
+                    'media_type' => $data['media_type'],
+                    'file_url' => $path,
+                    'thumbnail' => null,
+                    'title' => $data['title'] ?? null,
+                    'description' => $data['description'] ?? null,
+                    'sort_order' => $data['sort_order'],
+                    'is_active' => $data['is_active'],
                 ]);
             });
         } catch (\Throwable $e) {
@@ -208,7 +210,7 @@ class BusinessGalleryController extends Controller
         $this->checkGallery($business, $gallery);
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'gallery.manage'
         );
 
         return view('businesses.gallery.form', [
@@ -226,7 +228,7 @@ class BusinessGalleryController extends Controller
         $this->checkGallery($business, $gallery);
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'gallery.manage'
         );
 
         $data = $request->validate([
@@ -256,7 +258,7 @@ class BusinessGalleryController extends Controller
         $this->checkGallery($business, $gallery);
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'gallery.manage'
         );
 
         $filePath = $gallery->file_url;
@@ -265,12 +267,12 @@ class BusinessGalleryController extends Controller
         $gallery->delete();
 
         // Only delete files created by this gallery module.
-        $prefix = 'business-gallery/' . $business->id . '/';
+        $prefix = 'business-gallery/'.$business->id.'/';
 
         foreach (array_filter([$filePath, $thumbPath]) as $path) {
             if (
                 str_starts_with($path, $prefix)
-                && !BusinessGallery::query()
+                && ! BusinessGallery::query()
                     ->where('file_url', $path)
                     ->orWhere('thumbnail', $path)
                     ->exists()

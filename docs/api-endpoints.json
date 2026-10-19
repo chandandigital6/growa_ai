@@ -1,0 +1,2936 @@
+[
+  {
+    "method": "GET",
+    "uri": "nearby-businesses",
+    "controller": "GrowyaNearbyController",
+    "action": "index",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.growya.nearby.index"
+  },
+  {
+    "method": "GET",
+    "uri": "my-referrals",
+    "controller": "GrowyaReferralController",
+    "action": "mine",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.referrals.mine"
+  },
+  {
+    "method": "GET",
+    "uri": "offers",
+    "controller": "PublicOffersExploreController",
+    "action": "index",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.offers.index"
+  },
+  {
+    "method": "GET",
+    "uri": "my-notifications",
+    "controller": "GrowyaNotificationController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.notifications.index"
+  },
+  {
+    "method": "GET",
+    "uri": "my-reminder-preferences",
+    "controller": "GrowyaReminderPreferenceController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.reminders.preferences"
+  },
+  {
+    "method": "PATCH",
+    "uri": "my-reminder-preferences",
+    "controller": "GrowyaReminderPreferenceController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.reminders.preferences.update"
+  },
+  {
+    "method": "GET",
+    "uri": "my-wishlist",
+    "controller": "GrowyaWishlistController",
+    "action": "mine",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.wishlist.mine"
+  },
+  {
+    "method": "GET",
+    "uri": "my-messages",
+    "controller": "GrowyaChatController",
+    "action": "mine",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.mine"
+  },
+  {
+    "method": "GET",
+    "uri": "my-business-claims",
+    "controller": "GrowyaBusinessClaimController",
+    "action": "mine",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.claims.mine"
+  },
+  {
+    "method": "GET",
+    "uri": "my-following",
+    "controller": "BusinessFollowController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.public.business.following"
+  },
+  {
+    "method": "GET",
+    "uri": "",
+    "controller": "PublicHomeController",
+    "action": "index",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.home"
+  },
+  {
+    "method": "GET",
+    "uri": "marketplace",
+    "controller": "PublicMarketplaceController",
+    "action": "index",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.marketplace.index"
+  },
+  {
+    "method": "GET",
+    "uri": "search",
+    "controller": "PublicGlobalSearchController",
+    "action": "index",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.search.index"
+  },
+  {
+    "method": "GET",
+    "uri": "dashboard",
+    "controller": "GrowyaDashboardController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.dashboard"
+  },
+  {
+    "method": "GET",
+    "uri": "business-applications",
+    "controller": "GrowyaBusinessRequestController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.business-request.status"
+  },
+  {
+    "method": "GET",
+    "uri": "permissions",
+    "controller": "PermissionController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.permissions.index"
+  },
+  {
+    "method": "GET",
+    "uri": "my-orders",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "myOrders",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.orders.mine"
+  },
+  {
+    "method": "GET",
+    "uri": "my-addresses",
+    "controller": "GrowyaCustomerAddressController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.addresses.index"
+  },
+  {
+    "method": "POST",
+    "uri": "my-addresses",
+    "controller": "GrowyaCustomerAddressController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.addresses.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses",
+    "controller": "BusinessController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses",
+    "controller": "BusinessController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.store"
+  },
+  {
+    "method": "GET",
+    "uri": "categories",
+    "controller": "CategoryController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.categories.index"
+  },
+  {
+    "method": "POST",
+    "uri": "categories",
+    "controller": "CategoryController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.categories.store"
+  },
+  {
+    "method": "GET",
+    "uri": "tags",
+    "controller": "TagController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.tags.index"
+  },
+  {
+    "method": "POST",
+    "uri": "tags",
+    "controller": "TagController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.tags.store"
+  },
+  {
+    "method": "GET",
+    "uri": "attributes",
+    "controller": "AttributeController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.attributes.index"
+  },
+  {
+    "method": "POST",
+    "uri": "attributes",
+    "controller": "AttributeController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.attributes.store"
+  },
+  {
+    "method": "GET",
+    "uri": "roles",
+    "controller": "RoleController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.action.27"
+  },
+  {
+    "method": "POST",
+    "uri": "roles",
+    "controller": "RoleController",
+    "action": "store",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.action.28"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/referrals",
+    "controller": "GrowyaReferralController",
+    "action": "admin",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.referrals.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "my-notifications/poll",
+    "controller": "GrowyaLiveNotificationController",
+    "action": "poll",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.notifications.poll"
+  },
+  {
+    "method": "PATCH",
+    "uri": "my-notifications/read-all",
+    "controller": "GrowyaNotificationController",
+    "action": "readAll",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.notifications.read-all"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/lead-insights",
+    "controller": "GrowyaLeadInsightsController",
+    "action": "admin",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.lead-insights.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-reviews",
+    "controller": "AdminBusinessReviewController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.admin.business-reviews.index"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/wishlist-interests",
+    "controller": "GrowyaWishlistController",
+    "action": "admin",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.admin.wishlist.index"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/subscription-plans",
+    "controller": "GrowyaPlanController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.plans.index"
+  },
+  {
+    "method": "POST",
+    "uri": "admin/subscription-plans",
+    "controller": "GrowyaPlanController",
+    "action": "store",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.plans.store"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/subscriptions",
+    "controller": "GrowyaSubscriptionController",
+    "action": "adminIndex",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.subscriptions.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/paid-promotion-packages",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "packages",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.promotions.packages"
+  },
+  {
+    "method": "POST",
+    "uri": "admin/paid-promotion-packages",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "storePackage",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.promotions.packages.store"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/paid-promotions",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "adminIndex",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.promotions.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/analytics",
+    "controller": "GrowyaAnalyticsController",
+    "action": "admin",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.analytics.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "support/tickets",
+    "controller": "GrowyaSupportTicketController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.index"
+  },
+  {
+    "method": "POST",
+    "uri": "support/tickets",
+    "controller": "GrowyaSupportTicketController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.store"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-kyc",
+    "controller": "GrowyaBusinessKycController",
+    "action": "admin",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.kyc.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/chat-reports",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "reports",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.chat.reports"
+  },
+  {
+    "method": "GET",
+    "uri": "my-messages/unread-count",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "unread",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.unread"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-claims",
+    "controller": "GrowyaBusinessClaimController",
+    "action": "admin",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.claims.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/subscription-billing",
+    "controller": "GrowyaSubscriptionBillingController",
+    "action": "adminIndex",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.billing.admin"
+  },
+  {
+    "method": "GET",
+    "uri": "search/suggestions",
+    "controller": "PublicGlobalSearchController",
+    "action": "suggest",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.search.suggest"
+  },
+  {
+    "method": "POST",
+    "uri": "permissions/assign",
+    "controller": "PermissionController",
+    "action": "assign",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.permissions.assign"
+  },
+  {
+    "method": "POST",
+    "uri": "permissions/store",
+    "controller": "PermissionController",
+    "action": "store",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.permissions.store"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/access-control",
+    "controller": "GrowyaRoleMatrixController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.roles.matrix"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/user-roles",
+    "controller": "GrowyaUserRoleController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.users.roles.index"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-ownership",
+    "controller": "GrowyaBusinessOwnershipController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.ownership.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/create",
+    "controller": "BusinessController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.create"
+  },
+  {
+    "method": "GET",
+    "uri": "categories/create",
+    "controller": "CategoryController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.categories.create"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-verifications",
+    "controller": "BusinessVerificationController",
+    "action": "index",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.admin.business-verifications.index"
+  },
+  {
+    "method": "GET",
+    "uri": "roles/create",
+    "controller": "RoleController",
+    "action": "create",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.action.58"
+  },
+  {
+    "method": "GET",
+    "uri": "promoted/{promotion}",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "click",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.growya.promotions.click"
+  },
+  {
+    "method": "GET",
+    "uri": "messages/{thread}",
+    "controller": "GrowyaChatController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.show"
+  },
+  {
+    "method": "POST",
+    "uri": "messages/{thread}",
+    "controller": "GrowyaChatController",
+    "action": "send",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.send"
+  },
+  {
+    "method": "GET",
+    "uri": "business-claims/{claim}",
+    "controller": "GrowyaBusinessClaimController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.claims.show"
+  },
+  {
+    "method": "GET",
+    "uri": "subscription-billing/{document}",
+    "controller": "GrowyaSubscriptionBillingController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.billing.show"
+  },
+  {
+    "method": "DELETE",
+    "uri": "permissions/{permission}",
+    "controller": "PermissionController",
+    "action": "destroy",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.permissions.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "my-orders/{order}",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "order",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.orders.show"
+  },
+  {
+    "method": "PUT",
+    "uri": "my-addresses/{address}",
+    "controller": "GrowyaCustomerAddressController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.addresses.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "my-addresses/{address}",
+    "controller": "GrowyaCustomerAddressController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.addresses.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}",
+    "controller": "BusinessController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.show"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}",
+    "controller": "BusinessController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}",
+    "controller": "BusinessController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.destroy"
+  },
+  {
+    "method": "PUT",
+    "uri": "categories/{category}",
+    "controller": "CategoryController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.categories.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "categories/{category}",
+    "controller": "CategoryController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.categories.destroy"
+  },
+  {
+    "method": "PUT",
+    "uri": "tags/{tag}",
+    "controller": "TagController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.tags.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "tags/{tag}",
+    "controller": "TagController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.tags.destroy"
+  },
+  {
+    "method": "PUT",
+    "uri": "attributes/{attribute}",
+    "controller": "AttributeController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.attributes.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "attributes/{attribute}",
+    "controller": "AttributeController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.attributes.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}",
+    "controller": "PublicBusinessController",
+    "action": "home",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.home"
+  },
+  {
+    "method": "GET",
+    "uri": "roles/{role}",
+    "controller": "RoleController",
+    "action": "show",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.action.78"
+  },
+  {
+    "method": "PUT",
+    "uri": "roles/{role}",
+    "controller": "RoleController",
+    "action": "update",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.action.79"
+  },
+  {
+    "method": "DELETE",
+    "uri": "roles/{role}",
+    "controller": "RoleController",
+    "action": "destroy",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.action.80"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/referrals/settings",
+    "controller": "GrowyaReferralController",
+    "action": "settings",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.referrals.settings"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/lead-insights/export",
+    "controller": "GrowyaLeadInsightsController",
+    "action": "adminExport",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.lead-insights.admin.export"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/analytics/export",
+    "controller": "GrowyaAnalyticsController",
+    "action": "adminExport",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.analytics.admin.export"
+  },
+  {
+    "method": "GET",
+    "uri": "support/tickets/create",
+    "controller": "GrowyaSupportTicketController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.create"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/subscription-billing/export",
+    "controller": "GrowyaSubscriptionBillingController",
+    "action": "export",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.billing.export"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{business:slug}/offers",
+    "controller": "PublicOfferController",
+    "action": "index",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.offers"
+  },
+  {
+    "method": "POST",
+    "uri": "my-notifications/{recipient}/open",
+    "controller": "GrowyaNotificationController",
+    "action": "open",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.notifications.open"
+  },
+  {
+    "method": "PATCH",
+    "uri": "my-notifications/{recipient}/read",
+    "controller": "GrowyaNotificationController",
+    "action": "read",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.notifications.read"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}/reviews",
+    "controller": "BusinessReviewController",
+    "action": "publicIndex",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.reviews.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/finance",
+    "controller": "GrowyaFinanceController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.finance.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/finance",
+    "controller": "GrowyaFinanceController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.finance.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm-incentives",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm-staff",
+    "controller": "GrowyaCrmStaffController",
+    "action": "dashboard",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.staff.dashboard"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm-kanban",
+    "controller": "GrowyaCrmKanbanController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.kanban.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/lead-insights",
+    "controller": "GrowyaLeadInsightsController",
+    "action": "owner",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.lead-insights.owner"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/crm",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.store"
+  },
+  {
+    "method": "POST",
+    "uri": "b/{slug}/reviews",
+    "controller": "BusinessReviewController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.public.business.reviews.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/reviews",
+    "controller": "BusinessReviewController",
+    "action": "ownerIndex",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.reviews.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/map-location",
+    "controller": "GrowyaNearbyController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.nearby.location.edit"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/map-location",
+    "controller": "GrowyaNearbyController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.nearby.location.update"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/wishlist-interests",
+    "controller": "GrowyaWishlistController",
+    "action": "seller",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.wishlist.index"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/wishlist-interests/{interest}",
+    "controller": "GrowyaWishlistController",
+    "action": "adminUpdate",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.admin.wishlist.update"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/coupons",
+    "controller": "GrowyaCouponController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.coupons.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/coupons",
+    "controller": "GrowyaCouponController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.coupons.store"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/subscription-plans/{plan}",
+    "controller": "GrowyaPlanController",
+    "action": "update",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.plans.update"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/subscriptions",
+    "controller": "GrowyaSubscriptionController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.subscriptions.business"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/subscriptions",
+    "controller": "GrowyaSubscriptionController",
+    "action": "request",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.subscriptions.request"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/plan-usage",
+    "controller": "GrowyaPlanEntitlementController",
+    "action": "usage",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.entitlements.usage"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/paid-promotion-packages/{package}",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "updatePackage",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.promotions.packages.update"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/paid-promotions/{promotion}",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "review",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.promotions.review"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/paid-promotions",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "ownerIndex",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.promotions.owner"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/paid-promotions",
+    "controller": "GrowyaPaidPromotionController",
+    "action": "request",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.promotions.owner.request"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/analytics",
+    "controller": "GrowyaAnalyticsController",
+    "action": "owner",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.analytics.owner"
+  },
+  {
+    "method": "GET",
+    "uri": "support/tickets/{ticket}",
+    "controller": "GrowyaSupportTicketController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.show"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/kyc",
+    "controller": "GrowyaBusinessKycController",
+    "action": "owner",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.kyc.owner"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/kyc",
+    "controller": "GrowyaBusinessKycController",
+    "action": "submit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.kyc.submit"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-kyc/{submission}",
+    "controller": "GrowyaBusinessKycController",
+    "action": "adminShow",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.kyc.admin.show"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/business-kyc/{submission}",
+    "controller": "GrowyaBusinessKycController",
+    "action": "review",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.kyc.review"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/messages",
+    "controller": "GrowyaChatController",
+    "action": "inbox",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.inbox"
+  },
+  {
+    "method": "GET",
+    "uri": "messages/{thread}/poll",
+    "controller": "GrowyaChatController",
+    "action": "poll",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.poll"
+  },
+  {
+    "method": "PATCH",
+    "uri": "messages/{thread}/assign",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "assign",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.assign"
+  },
+  {
+    "method": "PATCH",
+    "uri": "messages/{thread}/block",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "block",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.block"
+  },
+  {
+    "method": "POST",
+    "uri": "messages/{thread}/report",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "report",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.report"
+  },
+  {
+    "method": "PATCH",
+    "uri": "messages/{thread}/followup",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "followup",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.followup"
+  },
+  {
+    "method": "GET",
+    "uri": "messages/{thread}/activity",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "activity",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.activity"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/chat-reports/{report}",
+    "controller": "GrowyaChatEnhancementController",
+    "action": "review",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.chat.reports.review"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/claim",
+    "controller": "GrowyaBusinessClaimController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.claims.create"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/claim",
+    "controller": "GrowyaBusinessClaimController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.claims.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/billing",
+    "controller": "GrowyaSubscriptionBillingController",
+    "action": "ownerIndex",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.billing.owner"
+  },
+  {
+    "method": "GET",
+    "uri": "subscription-billing/{document}/pdf",
+    "controller": "GrowyaSubscriptionBillingController",
+    "action": "pdf",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.billing.pdf"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/follow",
+    "controller": "BusinessFollowController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.public.business.follow"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/follow",
+    "controller": "BusinessFollowController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.public.business.unfollow"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/user-roles/{user}",
+    "controller": "GrowyaUserRoleController",
+    "action": "update",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.users.roles.update"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/business-ownership/{business}",
+    "controller": "GrowyaBusinessOwnershipController",
+    "action": "update",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.ownership.update"
+  },
+  {
+    "method": "GET",
+    "uri": "my-orders/{order}/payment",
+    "controller": "GrowyaPaymentController",
+    "action": "customerIndex",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.payments.customer"
+  },
+  {
+    "method": "POST",
+    "uri": "my-orders/{order}/payment",
+    "controller": "GrowyaPaymentController",
+    "action": "submit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.payments.submit"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/payments",
+    "controller": "GrowyaPaymentController",
+    "action": "sellerIndex",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.payments.index"
+  },
+  {
+    "method": "GET",
+    "uri": "my-orders/{order}/returns",
+    "controller": "GrowyaOrderReturnsController",
+    "action": "customerIndex",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.returns.customer"
+  },
+  {
+    "method": "POST",
+    "uri": "my-orders/{order}/returns",
+    "controller": "GrowyaOrderReturnsController",
+    "action": "submit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.returns.submit"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/returns",
+    "controller": "GrowyaOrderReturnsController",
+    "action": "sellerIndex",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.returns.index"
+  },
+  {
+    "method": "GET",
+    "uri": "my-orders/{order}/tracking",
+    "controller": "GrowyaDeliveryTrackingController",
+    "action": "customer",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.orders.tracking"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/delivery",
+    "controller": "GrowyaDeliveryTrackingController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.delivery.index"
+  },
+  {
+    "method": "GET",
+    "uri": "shops/{business}/cart",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.cart.index"
+  },
+  {
+    "method": "POST",
+    "uri": "shops/{business}/cart",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "add",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.cart.add"
+  },
+  {
+    "method": "GET",
+    "uri": "shops/{business}/checkout",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "checkoutForm",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.checkout.form"
+  },
+  {
+    "method": "POST",
+    "uri": "shops/{business}/checkout",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "place",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.checkout.place"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/orders",
+    "controller": "GrowyaBusinessOrderController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.orders.index"
+  },
+  {
+    "method": "PATCH",
+    "uri": "my-addresses/{address}/default",
+    "controller": "GrowyaCustomerAddressController",
+    "action": "setDefault",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.addresses.default"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/product-enquiries",
+    "controller": "ProductEnquiryController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.product-enquiries.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/edit",
+    "controller": "BusinessController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.edit"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/hours",
+    "controller": "BusinessHourController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.hours.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/hours",
+    "controller": "BusinessHourController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.hours.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/social-links",
+    "controller": "BusinessSocialLinkController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.social-links.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/social-links",
+    "controller": "BusinessSocialLinkController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.social-links.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/staff",
+    "controller": "BusinessStaffController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.staff.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/staff",
+    "controller": "BusinessStaffController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.staff.store"
+  },
+  {
+    "method": "GET",
+    "uri": "categories/{category}/edit",
+    "controller": "CategoryController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.categories.edit"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products",
+    "controller": "ProductController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products",
+    "controller": "ProductController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.store"
+  },
+  {
+    "method": "POST",
+    "uri": "attributes/{attribute}/values",
+    "controller": "AttributeController",
+    "action": "storeValue",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.attributes.values.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/services",
+    "controller": "ServiceController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/services",
+    "controller": "ServiceController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/service-enquiries",
+    "controller": "ServiceEnquiryController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.service-enquiries.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/service-follow-ups",
+    "controller": "ServiceEnquiryFollowUpController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.service-follow-ups.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/appointments",
+    "controller": "AppointmentController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.appointments.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/appointments",
+    "controller": "AppointmentController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.appointments.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/gallery",
+    "controller": "BusinessGalleryController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.gallery.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/gallery",
+    "controller": "BusinessGalleryController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.gallery.store"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-verifications/{business}",
+    "controller": "BusinessVerificationController",
+    "action": "show",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.admin.business-verifications.show"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/offers",
+    "controller": "BusinessOfferController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.offers.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/offers",
+    "controller": "BusinessOfferController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.offers.store"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}/products",
+    "controller": "PublicBusinessController",
+    "action": "products",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.products"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}/services",
+    "controller": "PublicBusinessController",
+    "action": "services",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.services"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}/gallery",
+    "controller": "PublicBusinessController",
+    "action": "gallery",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.gallery"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}/contact",
+    "controller": "PublicBusinessController",
+    "action": "contact",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.contact"
+  },
+  {
+    "method": "GET",
+    "uri": "roles/{role}/edit",
+    "controller": "RoleController",
+    "action": "edit",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.action.177"
+  },
+  {
+    "method": "POST",
+    "uri": "my-wishlist/{type}/{id}",
+    "controller": "GrowyaWishlistController",
+    "action": "add",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.wishlist.add"
+  },
+  {
+    "method": "DELETE",
+    "uri": "my-wishlist/{type}/{id}",
+    "controller": "GrowyaWishlistController",
+    "action": "remove",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.wishlist.remove"
+  },
+  {
+    "method": "GET",
+    "uri": "p/{business}/{product}",
+    "controller": "PublicProductController",
+    "action": "show",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.products.show"
+  },
+  {
+    "method": "POST",
+    "uri": "admin/referrals/{referral}/approve",
+    "controller": "GrowyaReferralController",
+    "action": "approveBusinessReward",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.referrals.approve"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/finance/categories",
+    "controller": "GrowyaFinanceController",
+    "action": "storeCategory",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.finance.categories.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/finance/export",
+    "controller": "GrowyaFinanceController",
+    "action": "export",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.finance.export"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm-incentives/report",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "report",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.report"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm-incentives/export",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "export",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.export"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/crm-incentives/rules",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "rule",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.rule"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/crm-incentives/claims",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "claim",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.claim"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm-staff/report",
+    "controller": "GrowyaCrmStaffController",
+    "action": "report",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.staff.report"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/crm-staff/targets",
+    "controller": "GrowyaCrmStaffController",
+    "action": "target",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.staff.target"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/lead-insights/export",
+    "controller": "GrowyaLeadInsightsController",
+    "action": "ownerExport",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.lead-insights.owner.export"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm/create",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.create"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm/export",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "export",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.export"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/crm/import",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "import",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.import"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/business-reviews/{review}/moderate",
+    "controller": "AdminBusinessReviewController",
+    "action": "update",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.admin.business-reviews.update"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/coupons/create",
+    "controller": "GrowyaCouponController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.coupons.create"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/subscriptions/{subscription}/review",
+    "controller": "GrowyaSubscriptionController",
+    "action": "review",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.subscriptions.review"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/subscription-plans/{plan}/limits",
+    "controller": "GrowyaPlanEntitlementController",
+    "action": "edit",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.entitlements.edit"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/subscription-plans/{plan}/limits",
+    "controller": "GrowyaPlanEntitlementController",
+    "action": "update",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.entitlements.update"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/businesses/{business}/plan-overrides",
+    "controller": "GrowyaBusinessPlanOverrideController",
+    "action": "edit",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.plan-overrides.edit"
+  },
+  {
+    "method": "POST",
+    "uri": "admin/businesses/{business}/plan-overrides",
+    "controller": "GrowyaBusinessPlanOverrideController",
+    "action": "save",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.plan-overrides.save"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/analytics/export",
+    "controller": "GrowyaAnalyticsController",
+    "action": "ownerExport",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.analytics.owner.export"
+  },
+  {
+    "method": "POST",
+    "uri": "support/tickets/{ticket}/reply",
+    "controller": "GrowyaSupportTicketController",
+    "action": "reply",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.reply"
+  },
+  {
+    "method": "PATCH",
+    "uri": "support/tickets/{ticket}/status",
+    "controller": "GrowyaSupportTicketController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.update"
+  },
+  {
+    "method": "PATCH",
+    "uri": "support/tickets/{ticket}/assign",
+    "controller": "GrowyaSupportTicketController",
+    "action": "assign",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.assign"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/messages/start",
+    "controller": "GrowyaChatController",
+    "action": "start",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.start"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/business-claims/{claim}/review",
+    "controller": "GrowyaBusinessClaimController",
+    "action": "review",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.claims.review"
+  },
+  {
+    "method": "POST",
+    "uri": "admin/subscription-billing/payments/{payment}",
+    "controller": "GrowyaSubscriptionBillingController",
+    "action": "issue",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.billing.issue"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/access-control/roles/{role}",
+    "controller": "GrowyaRoleMatrixController",
+    "action": "update",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.roles.matrix.update"
+  },
+  {
+    "method": "GET",
+    "uri": "admin/business-ownership/{business}/edit",
+    "controller": "GrowyaBusinessOwnershipController",
+    "action": "edit",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.ownership.edit"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/staff/history",
+    "controller": "BusinessStaffController",
+    "action": "history",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.staff.history"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/bulk",
+    "controller": "ProductBulkController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.bulk.index"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/create",
+    "controller": "ProductController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.create"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/services/create",
+    "controller": "ServiceController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.create"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/appointments/create",
+    "controller": "AppointmentController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.appointments.create"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/gallery/create",
+    "controller": "BusinessGalleryController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.gallery.create"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/business-verifications/{business}/approve",
+    "controller": "BusinessVerificationController",
+    "action": "approve",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.admin.business-verifications.approve"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/business-verifications/{business}/reject",
+    "controller": "BusinessVerificationController",
+    "action": "reject",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.admin.business-verifications.reject"
+  },
+  {
+    "method": "PATCH",
+    "uri": "admin/business-verifications/{business}/pending",
+    "controller": "BusinessVerificationController",
+    "action": "pending",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.admin.business-verifications.pending"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/offers/create",
+    "controller": "BusinessOfferController",
+    "action": "create",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.offers.create"
+  },
+  {
+    "method": "GET",
+    "uri": "products/{business}/{product}/enquiry",
+    "controller": "ProductEnquiryController",
+    "action": "create",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.products.enquiry.create"
+  },
+  {
+    "method": "POST",
+    "uri": "products/{business}/{product}/enquiry",
+    "controller": "ProductEnquiryController",
+    "action": "store",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.products.enquiry.store"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/finance/{entry}",
+    "controller": "GrowyaFinanceController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.finance.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/finance/{entry}",
+    "controller": "GrowyaFinanceController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.finance.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm-staff/{contact}",
+    "controller": "GrowyaCrmStaffController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.staff.show"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/crm-kanban/{contact}",
+    "controller": "GrowyaCrmKanbanController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.kanban.update"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm/{contact}",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.show"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/crm/{contact}",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.update"
+  },
+  {
+    "method": "PUT",
+    "uri": "b/{slug}/reviews/{review}",
+    "controller": "BusinessReviewController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.public.business.reviews.update"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/wishlist-interests/{interest}",
+    "controller": "GrowyaWishlistController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.wishlist.update"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/coupons/{coupon}",
+    "controller": "GrowyaCouponController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.coupons.update"
+  },
+  {
+    "method": "GET",
+    "uri": "business-kyc/{submission}/documents/{document}",
+    "controller": "GrowyaBusinessKycController",
+    "action": "download",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.kyc.download"
+  },
+  {
+    "method": "GET",
+    "uri": "messages/{thread}/files/{message}",
+    "controller": "GrowyaChatController",
+    "action": "file",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.chat.file"
+  },
+  {
+    "method": "GET",
+    "uri": "business-claims/{claim}/documents/{document}",
+    "controller": "GrowyaBusinessClaimController",
+    "action": "document",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.claims.document"
+  },
+  {
+    "method": "DELETE",
+    "uri": "roles/{role}/permissions/{permission}",
+    "controller": "RoleController",
+    "action": "removePermission",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.roles.permissions.remove"
+  },
+  {
+    "method": "PATCH",
+    "uri": "shops/{business}/cart/{item}",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.cart.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "shops/{business}/cart/{item}",
+    "controller": "GrowyaCartCheckoutController",
+    "action": "remove",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.cart.remove"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/orders/{order}",
+    "controller": "GrowyaBusinessOrderController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.orders.show"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/product-enquiries/{enquiry}",
+    "controller": "ProductEnquiryController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.product-enquiries.show"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/staff/{member}",
+    "controller": "BusinessStaffController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.staff.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/staff/{member}",
+    "controller": "BusinessStaffController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.staff.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}",
+    "controller": "ProductController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.show"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/products/{product}",
+    "controller": "ProductController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/products/{product}",
+    "controller": "ProductController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.destroy"
+  },
+  {
+    "method": "PUT",
+    "uri": "attributes/{attribute}/values/{value}",
+    "controller": "AttributeController",
+    "action": "updateValue",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.attributes.values.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "attributes/{attribute}/values/{value}",
+    "controller": "AttributeController",
+    "action": "destroyValue",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.attributes.values.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/services/{service}",
+    "controller": "ServiceController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.show"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/services/{service}",
+    "controller": "ServiceController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/services/{service}",
+    "controller": "ServiceController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/service-enquiries/{enquiry}",
+    "controller": "ServiceEnquiryController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.service-enquiries.show"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/appointments/{appointment}",
+    "controller": "AppointmentController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.appointments.show"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/gallery/{gallery}",
+    "controller": "BusinessGalleryController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.gallery.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/gallery/{gallery}",
+    "controller": "BusinessGalleryController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.gallery.destroy"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/offers/{offer}",
+    "controller": "BusinessOfferController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.offers.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/offers/{offer}",
+    "controller": "BusinessOfferController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.offers.destroy"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}/products/{productSlug}",
+    "controller": "PublicBusinessController",
+    "action": "product",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.product"
+  },
+  {
+    "method": "GET",
+    "uri": "b/{slug}/services/{serviceSlug}",
+    "controller": "PublicBusinessController",
+    "action": "service",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.business.service"
+  },
+  {
+    "method": "GET",
+    "uri": "s/{business}/{service}/enquiry",
+    "controller": "PublicServiceEnquiryController",
+    "action": "create",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.services.enquiries.create"
+  },
+  {
+    "method": "POST",
+    "uri": "s/{business}/{service}/enquiry",
+    "controller": "PublicServiceEnquiryController",
+    "action": "store",
+    "public": true,
+    "admin": false,
+    "name": "api.v1.public.services.enquiries.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/catalog/{kind}",
+    "controller": "TenantCatalogController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.catalog.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/catalog/{kind}",
+    "controller": "TenantCatalogController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.catalog.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/bulk/template",
+    "controller": "ProductBulkController",
+    "action": "template",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.bulk.template"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products/bulk/import",
+    "controller": "ProductBulkController",
+    "action": "import",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.bulk.import"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/bulk/export",
+    "controller": "ProductBulkController",
+    "action": "export",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.bulk.export"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/bulk/errors",
+    "controller": "ProductBulkController",
+    "action": "errorReport",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.bulk.errors"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products/qr/bulk-print",
+    "controller": "ProductQrCodeController",
+    "action": "bulkPrint",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.qr.bulk-print"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/crm-staff/{contact}/assign",
+    "controller": "GrowyaCrmStaffController",
+    "action": "assign",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.staff.assign"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/crm-staff/{contact}/progress",
+    "controller": "GrowyaCrmStaffController",
+    "action": "progress",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.staff.progress"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/crm-staff/{contact}/activities",
+    "controller": "GrowyaCrmStaffController",
+    "action": "activity",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.staff.activity"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm/{contact}/360",
+    "controller": "GrowyaCrmAdvancedController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.advanced.show"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/crm/{contact}/edit",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.edit"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/crm/{contact}/activities",
+    "controller": "GrowyaBusinessCrmController",
+    "action": "note",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.note"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/reviews/{review}/reply",
+    "controller": "BusinessReviewController",
+    "action": "reply",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.reviews.reply"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/coupons/{coupon}/edit",
+    "controller": "GrowyaCouponController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.coupons.edit"
+  },
+  {
+    "method": "DELETE",
+    "uri": "admin/businesses/{business}/plan-overrides/{key}",
+    "controller": "GrowyaBusinessPlanOverrideController",
+    "action": "remove",
+    "public": false,
+    "admin": true,
+    "name": "api.v1.growya.plan-overrides.remove"
+  },
+  {
+    "method": "GET",
+    "uri": "support/tickets/{ticket}/attachments/{attachment}",
+    "controller": "GrowyaSupportTicketController",
+    "action": "attachment",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.support.attachment"
+  },
+  {
+    "method": "GET",
+    "uri": "my-orders/{order}/payment/{submission}/proof",
+    "controller": "GrowyaPaymentController",
+    "action": "customerProof",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.payments.customer-proof"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/returns/{returnRequest}/review",
+    "controller": "GrowyaOrderReturnsController",
+    "action": "review",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.returns.review"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/returns/{returnRequest}/refund",
+    "controller": "GrowyaOrderReturnsController",
+    "action": "markRefunded",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.returns.refund"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/orders/{order}/delivery",
+    "controller": "GrowyaDeliveryTrackingController",
+    "action": "sellerShow",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.orders.delivery.show"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/orders/{order}/delivery",
+    "controller": "GrowyaDeliveryTrackingController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.orders.delivery.update"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/orders/{order}/status",
+    "controller": "GrowyaBusinessOrderController",
+    "action": "status",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.orders.status"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/product-enquiries/{enquiry}/status",
+    "controller": "ProductEnquiryController",
+    "action": "status",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.product-enquiries.status"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/product-enquiries/{enquiry}/notes",
+    "controller": "ProductEnquiryController",
+    "action": "note",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.product-enquiries.notes.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/edit",
+    "controller": "ProductController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.edit"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/gallery",
+    "controller": "ProductImageController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.gallery.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products/{product}/gallery",
+    "controller": "ProductImageController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.gallery.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/variants",
+    "controller": "ProductVariantController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.variants.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products/{product}/variants",
+    "controller": "ProductVariantController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.variants.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/tags",
+    "controller": "ProductTagController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.tags.index"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/products/{product}/tags",
+    "controller": "ProductTagController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.tags.update"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/attributes",
+    "controller": "ProductAttributeController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.attributes.index"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/products/{product}/attributes",
+    "controller": "ProductAttributeController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.attributes.update"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/inventory",
+    "controller": "ProductInventoryController",
+    "action": "index",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.inventory.index"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products/{product}/inventory",
+    "controller": "ProductInventoryController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.inventory.store"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/qr",
+    "controller": "ProductQrCodeController",
+    "action": "show",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.qr.show"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products/{product}/qr",
+    "controller": "ProductQrCodeController",
+    "action": "generate",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.qr.generate"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/services/{service}/edit",
+    "controller": "ServiceController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.edit"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/services/{service}/images",
+    "controller": "ServiceImageController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.images.store"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/service-enquiries/{enquiry}/status",
+    "controller": "ServiceEnquiryController",
+    "action": "updateStatus",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.service-enquiries.status"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/service-enquiries/{enquiry}/follow-ups",
+    "controller": "ServiceEnquiryFollowUpController",
+    "action": "store",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.service-enquiries.follow-ups.store"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/appointments/{appointment}/status",
+    "controller": "AppointmentController",
+    "action": "updateStatus",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.appointments.status"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/gallery/{gallery}/edit",
+    "controller": "BusinessGalleryController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.gallery.edit"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/offers/{offer}/edit",
+    "controller": "BusinessOfferController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.offers.edit"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/catalog-attributes/{attribute}/values",
+    "controller": "TenantCatalogController",
+    "action": "storeValue",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.catalog.values.store"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/catalog/{kind}/{item}",
+    "controller": "TenantCatalogController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.catalog.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/catalog/{kind}/{item}",
+    "controller": "TenantCatalogController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.catalog.destroy"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/crm-incentives/rules/{rule}/toggle",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "toggleRule",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.rule.toggle"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/crm-incentives/claims/{claim}/review",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "review",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.review"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/crm-incentives/claims/{claim}/pay",
+    "controller": "GrowyaCrmIncentiveController",
+    "action": "pay",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.growya.crm.incentives.pay"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/qr/download",
+    "controller": "ProductQrCodeController",
+    "action": "download",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.qr.download"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/qr/print",
+    "controller": "ProductQrCodeController",
+    "action": "print",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.qr.print"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/products/{product}/gallery/{image}",
+    "controller": "ProductImageController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.gallery.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/products/{product}/gallery/{image}",
+    "controller": "ProductImageController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.gallery.destroy"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/products/{product}/variants/{variant}",
+    "controller": "ProductVariantController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.variants.update"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/products/{product}/variants/{variant}",
+    "controller": "ProductVariantController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.variants.destroy"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/services/{service}/images/{image}",
+    "controller": "ServiceImageController",
+    "action": "destroy",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.images.destroy"
+  },
+  {
+    "method": "DELETE",
+    "uri": "businesses/{business}/catalog-attributes/{attribute}/values/{value}",
+    "controller": "TenantCatalogController",
+    "action": "destroyValue",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.catalog.values.destroy"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/orders/{order}/payment/{submission}/review",
+    "controller": "GrowyaPaymentController",
+    "action": "review",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.payments.review"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/orders/{order}/payment/{submission}/proof",
+    "controller": "GrowyaPaymentController",
+    "action": "proof",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.payments.proof"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/product-enquiries/{enquiry}/notes/{note}/complete",
+    "controller": "ProductEnquiryController",
+    "action": "complete",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.product-enquiries.notes.complete"
+  },
+  {
+    "method": "POST",
+    "uri": "businesses/{business}/products/{product}/gallery/{image}/featured",
+    "controller": "ProductImageController",
+    "action": "featured",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.gallery.featured"
+  },
+  {
+    "method": "GET",
+    "uri": "businesses/{business}/products/{product}/variants/{variant}/attributes",
+    "controller": "ProductVariantAttributeController",
+    "action": "edit",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.variants.attributes.edit"
+  },
+  {
+    "method": "PUT",
+    "uri": "businesses/{business}/products/{product}/variants/{variant}/attributes",
+    "controller": "ProductVariantAttributeController",
+    "action": "update",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.products.variants.attributes.update"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/services/{service}/images/{image}/featured",
+    "controller": "ServiceImageController",
+    "action": "featured",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.services.images.featured"
+  },
+  {
+    "method": "PATCH",
+    "uri": "businesses/{business}/service-enquiries/{enquiry}/follow-ups/{followUp}/complete",
+    "controller": "ServiceEnquiryFollowUpController",
+    "action": "complete",
+    "public": false,
+    "admin": false,
+    "name": "api.v1.businesses.service-enquiries.follow-ups.complete"
+  }
+]

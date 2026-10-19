@@ -6,10 +6,12 @@ use App\Actions\Teams\CreateTeam;
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
 use App\Models\User;
+use App\Services\GrowyaReferralService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
+use Spatie\Permission\Models\Role;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -31,6 +33,7 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
+            'account_type' => ['sometimes', Rule::in(['personal', 'business'])],
             'phone' => ['required', 'regex:/^[6-9][0-9]{9}$/', Rule::unique('users', 'phone')],
             'referral_code' => ['nullable', 'string', 'max:20', Rule::exists('growya_referral_codes', 'code')],
         ])->validate();
@@ -40,14 +43,14 @@ class CreateNewUser implements CreatesNewUsers
                 'name' => $input['name'],
                 'email' => $input['email'],
                 'phone' => $input['phone'],
-                'user_type' => 'customer',
+                'user_type' => ($input['account_type'] ?? 'personal') === 'business' ? 'owner' : 'customer',
                 'status' => 'active',
                 'password' => $input['password'],
             ]);
 
-            \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
+            Role::firstOrCreate(['name' => 'user', 'guard_name' => 'web']);
             $user->assignRole('user');
-            app(\App\Services\GrowyaReferralService::class)->register($user, $input['referral_code'] ?? null);
+            app(GrowyaReferralService::class)->register($user, $input['referral_code'] ?? null);
             $this->createTeam->handle($user, $user->name."'s Team", isPersonal: true);
 
             return $user;

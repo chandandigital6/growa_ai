@@ -19,11 +19,13 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             BusinessPermissionSeeder::class,
+            GrowyaSupportPermissionSeeder::class,
+            GrowyaReferralSettingsSeeder::class,
             GrowyaDashboardPermissionSeeder::class,
             GrowyaAdvancedDashboardPermissionSeeder::class,
             BusinessCategorySeeder::class,
             IndiaLocationSeeder::class,
-            
+
         ]);
     }
 }

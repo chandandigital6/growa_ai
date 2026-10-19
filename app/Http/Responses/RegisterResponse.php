@@ -13,6 +13,6 @@ class RegisterResponse implements RegisterResponseContract
     {
         return $request->wantsJson()
             ? new JsonResponse(['two_factor' => false], 201)
-            : redirect()->intended(Fortify::redirects('register'));
+            : ($request->input('account_type') === 'business' ? redirect()->route('businesses.create') : redirect()->intended(Fortify::redirects('register')));
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Service;
 use App\Models\ServiceEnquiry;
 use App\Services\BusinessAccessService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -54,7 +55,7 @@ class AppointmentController extends Controller
 
     public function index(Request $request, Business $business)
     {
-        $this->authorizeBusiness($business, 'services.view');
+        $this->authorizeBusiness($business, 'appointments.view');
 
         $request->validate([
             'status' => [
@@ -174,7 +175,7 @@ class AppointmentController extends Controller
 
     public function create(Request $request, Business $business)
     {
-        $this->authorizeBusiness($business, 'services.update');
+        $this->authorizeBusiness($business, 'appointments.manage');
 
         $services = $this->services($business);
         $enquiry = null;
@@ -188,7 +189,7 @@ class AppointmentController extends Controller
 
         return view('appointments.form', [
             'business' => $business,
-            'appointment' => new Appointment(),
+            'appointment' => new Appointment,
             'services' => $services,
             'enquiry' => $enquiry,
         ]);
@@ -245,13 +246,13 @@ class AppointmentController extends Controller
 
     public function store(Request $request, Business $business)
     {
-        $this->authorizeBusiness($business, 'services.update');
+        $this->authorizeBusiness($business, 'appointments.manage');
 
         $data = $this->validated($request, $business);
 
         $enquiry = null;
 
-        if (!empty($data['service_enquiry_id'])) {
+        if (! empty($data['service_enquiry_id'])) {
             $enquiry = ServiceEnquiry::query()
                 ->where('business_id', $business->id)
                 ->whereKey($data['service_enquiry_id'])
@@ -259,14 +260,13 @@ class AppointmentController extends Controller
 
             if ((int) $enquiry->service_id !== (int) $data['service_id']) {
                 throw ValidationException::withMessages([
-                    'service_id' =>
-                        'Selected service does not match the enquiry.',
+                    'service_id' => 'Selected service does not match the enquiry.',
                 ]);
             }
         }
 
-        $appointmentDateTime = \Illuminate\Support\Carbon::parse(
-            $data['appointment_date'] . ' ' . $data['appointment_time'],
+        $appointmentDateTime = Carbon::parse(
+            $data['appointment_date'].' '.$data['appointment_time'],
             config('app.timezone')
         );
 
@@ -306,8 +306,7 @@ class AppointmentController extends Controller
 
             if ($exists) {
                 throw ValidationException::withMessages([
-                    'appointment_time' =>
-                        'This service already has an active booking at the selected time.',
+                    'appointment_time' => 'This service already has an active booking at the selected time.',
                 ]);
             }
 
@@ -338,7 +337,7 @@ class AppointmentController extends Controller
         Appointment $appointment
     ) {
         $this->checkAppointment($business, $appointment);
-        $this->authorizeBusiness($business, 'services.view');
+        $this->authorizeBusiness($business, 'appointments.view');
 
         $appointment->load([
             'service:id,name,business_id',
@@ -358,7 +357,7 @@ class AppointmentController extends Controller
         Appointment $appointment
     ) {
         $this->checkAppointment($business, $appointment);
-        $this->authorizeBusiness($business, 'services.update');
+        $this->authorizeBusiness($business, 'appointments.manage');
 
         $data = $request->validate([
             'status' => [
@@ -378,8 +377,7 @@ class AppointmentController extends Controller
             && $data['status'] !== $appointment->status
         ) {
             throw ValidationException::withMessages([
-                'status' =>
-                    'Completed or cancelled appointments cannot be reopened.',
+                'status' => 'Completed or cancelled appointments cannot be reopened.',
             ]);
         }
 

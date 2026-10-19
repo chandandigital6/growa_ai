@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Services\BusinessAccessService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,18 +25,13 @@ class GrowyaLeadInsightsController extends Controller
         if ($from->gt($to) || $from->diffInDays($to) > 366) {
             throw ValidationException::withMessages(['from' => 'Choose a valid range of up to 366 days.']);
         }
+
         return [$from, $to, $validated['source'] ?? 'all', $validated['status'] ?? 'all'];
     }
 
     private function ownerOnly(Request $request, Business $business): void
     {
-        $user = $request->user();
-        abort_unless($user && (
-            $user->hasRole('super_admin', 'web') ||
-            ((int) $business->owner_id === (int) $user->id &&
-             $user->status === 'active' && $business->status === 'active' &&
-             $business->verification_status === 'approved')
-        ), 403);
+        abort_unless(auth()->user() && app(BusinessAccessService::class)->can(auth()->user(), $business, 'leads.view'), 403);
     }
 
     private function adminOnly(Request $request): void
@@ -48,7 +44,10 @@ class GrowyaLeadInsightsController extends Controller
     {
         $scope = function ($query, string $dateColumn, string $businessColumn = 'business_id') use ($businessId, $from, $to) {
             $query->whereBetween($dateColumn, [$from, $to]);
-            if ($businessId !== null) $query->where($businessColumn, $businessId);
+            if ($businessId !== null) {
+                $query->where($businessColumn, $businessId);
+            }
+
             return $query;
         };
 
@@ -70,7 +69,9 @@ class GrowyaLeadInsightsController extends Controller
                 ->selectRaw("'chat' as source, id as source_id, business_id, customer_id, CASE WHEN context_type = 'product' THEN context_id ELSE NULL END as product_id, CAST(NULL AS CHAR(255)) as customer_name, followup_status as raw_status, followup_at as next_followup_at, assigned_to as assigned_user_id, created_at");
         }
         $base = array_shift($parts);
-        foreach ($parts as $part) $base->unionAll($part);
+        foreach ($parts as $part) {
+            $base->unionAll($part);
+        }
         $query = DB::query()->fromSub($base, 'lead_rows');
         if ($status !== 'all') {
             $aliases = [
@@ -82,6 +83,7 @@ class GrowyaLeadInsightsController extends Controller
             ];
             $query->whereIn('raw_status', $aliases[$status]);
         }
+
         return $query;
     }
 
@@ -99,7 +101,7 @@ class GrowyaLeadInsightsController extends Controller
             : collect();
         $names = DB::table('businesses')->whereIn('id', $byBusiness->pluck('business_id')->all())->pluck('name', 'id');
         $overdue = (clone $base)->whereNotNull('next_followup_at')->where('next_followup_at', '<', now())
-            ->whereNotIn('raw_status', ['closed','converted','cancelled','rejected'])->count();
+            ->whereNotIn('raw_status', ['closed', 'converted', 'cancelled', 'rejected'])->count();
         $staff = (clone $base)->whereNotNull('assigned_user_id')->select('assigned_user_id')
             ->selectRaw('COUNT(*) as handled, SUM(CASE WHEN raw_status = ? THEN 1 ELSE 0 END) as converted', ['converted'])
             ->groupBy('assigned_user_id')->orderByDesc('handled')->limit(15)->get();
@@ -107,18 +109,21 @@ class GrowyaLeadInsightsController extends Controller
         $topProducts = (clone $base)->whereNotNull('product_id')->select('product_id')
             ->selectRaw('COUNT(*) as interests')->groupBy('product_id')->orderByDesc('interests')->limit(10)->get();
         $productNames = DB::table('products')->whereIn('id', $topProducts->pluck('product_id')->all())->pluck('name', 'id');
+
         return view('growya-lead-insights.dashboard', compact('business', 'admin', 'from', 'to', 'source', 'status', 'rows', 'total', 'converted', 'bySource', 'byStatus', 'byBusiness', 'names', 'overdue', 'staff', 'staffNames', 'topProducts', 'productNames'));
     }
 
     public function owner(Request $request, Business $business)
     {
         $this->ownerOnly($request, $business);
+
         return $this->report($request, $business, false);
     }
 
     public function admin(Request $request)
     {
         $this->adminOnly($request);
+
         return $this->report($request, null, true);
     }
 
@@ -126,32 +131,37 @@ class GrowyaLeadInsightsController extends Controller
     {
         [$from, $to, $source, $status] = $this->dates($request);
         $query = $this->leads($business?->id, $from, $to, $source, $status)->orderBy('created_at')->orderBy('source_id');
+
         return response()->streamDownload(function () use ($query) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['source','source_id','business_id','customer_id','product_id','customer_name','raw_status','assigned_user_id','next_followup_at','created_at']);
+            fputcsv($out, ['source', 'source_id', 'business_id', 'customer_id', 'product_id', 'customer_name', 'raw_status', 'assigned_user_id', 'next_followup_at', 'created_at']);
             foreach ($query->cursor() as $r) {
                 // Protect spreadsheet viewers against formula injection.
                 $values = (array) $r;
                 foreach ($values as &$value) {
-                    if (is_string($value) && preg_match('/^[\s]*[=+@\-]/u', $value)) $value = "'" . $value;
+                    if (is_string($value) && preg_match('/^[\s]*[=+@\-]/u', $value)) {
+                        $value = "'".$value;
+                    }
                 }
                 unset($value);
                 fputcsv($out, array_values($values));
             }
             fclose($out);
-        }, 'growya-lead-insights-' . now()->format('Ymd-His') . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }, 'growya-lead-insights-'.now()->format('Ymd-His').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function ownerExport(Request $request, Business $business): StreamedResponse
     {
         $this->ownerOnly($request, $business);
+
         return $this->export($request, $business);
     }
 
     public function adminExport(Request $request): StreamedResponse
     {
         $this->adminOnly($request);
+
         return $this->export($request, null);
     }
 }

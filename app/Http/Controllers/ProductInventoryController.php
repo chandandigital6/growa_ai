@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Product;
-use App\Models\ProductVariant;
 use App\Models\ProductStockMovement;
+use App\Models\ProductVariant;
 use App\Services\BusinessAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +44,7 @@ class ProductInventoryController extends Controller
         $this->authorizeAccess(
             $business,
             $product,
-            'products.view'
+            'inventory.view'
         );
 
         $variants = $product->variants()
@@ -80,7 +80,7 @@ class ProductInventoryController extends Controller
         $this->authorizeAccess(
             $business,
             $product,
-            'products.update'
+            'inventory.manage'
         );
 
         $data = $request->validate([
@@ -127,7 +127,7 @@ class ProductInventoryController extends Controller
             ]);
         }
 
-        if (!$isVariant && !empty($data['variant_id'])) {
+        if (! $isVariant && ! empty($data['variant_id'])) {
             throw ValidationException::withMessages([
                 'variant_id' => 'Variant must not be selected for main product stock.',
             ]);
@@ -175,8 +175,7 @@ class ProductInventoryController extends Controller
 
             if ($after < 0) {
                 throw ValidationException::withMessages([
-                    'quantity' =>
-                        'Insufficient stock. Available stock: ' . $before,
+                    'quantity' => 'Insufficient stock. Available stock: '.$before,
                 ]);
             }
 
@@ -196,7 +195,7 @@ class ProductInventoryController extends Controller
 
             // Main product stock_status is maintained only
             // when main product quantity changes.
-            if (!$isVariant) {
+            if (! $isVariant) {
                 $stockItem->stock_status = $after > 0
                     ? 'in_stock'
                     : 'out_of_stock';

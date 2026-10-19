@@ -25,21 +25,13 @@ class GrowyaAnalyticsController extends Controller
         if ($from->gt($to) || $from->diffInDays($to) > 366) {
             throw ValidationException::withMessages(['from' => 'Choose a date range of at most 366 days, with From before To.']);
         }
+
         return [$from, $to];
     }
 
     private function authorizeOwner(Request $request, Business $business): void
     {
-        abort_unless(
-            $request->user() && (
-                $request->user()->hasRole('super_admin', 'web') ||
-                ((int) $business->owner_id === (int) $request->user()->id &&
-                    $request->user()->status === 'active' && $business->status === 'active' &&
-                    $business->verification_status === 'approved')
-            ),
-            403
-        );
-        // Reporting financials must not be exposed to a user who merely has products.view.
+        abort_unless(auth()->user() && app(BusinessAccessService::class)->can(auth()->user(), $business, 'analytics.view'), 403);
     }
 
     private function authorizeAdmin(Request $request): void
@@ -49,7 +41,7 @@ class GrowyaAnalyticsController extends Controller
 
     private function report(Carbon $from, Carbon $to, ?Business $business): array
     {
-        $range = fn($q, $col = 'created_at') => $q->whereBetween($col, [$from, $to]);
+        $range = fn ($q, $col = 'created_at') => $q->whereBetween($col, [$from, $to]);
         $scope = function ($q, string $column = 'business_id') use ($business) {
             return $business ? $q->where($column, $business->id) : $q;
         };
@@ -72,7 +64,9 @@ class GrowyaAnalyticsController extends Controller
             ->join('subscriptions', 'subscriptions.id', '=', 'subscription_payments.subscription_id')
             ->whereBetween('subscription_payments.paid_at', [$from, $to])
             ->where('subscription_payments.status', 'admin_recorded');
-        if ($business) $subscriptionPayments->where('subscriptions.business_id', $business->id);
+        if ($business) {
+            $subscriptionPayments->where('subscriptions.business_id', $business->id);
+        }
         $stats['subscription_payments_recorded'] = round((float) $subscriptionPayments->sum('subscription_payments.amount'), 2);
         $promotions = $scope(DB::table('growya_paid_promotions'))
             ->whereBetween('reviewed_at', [$from, $to])
@@ -94,7 +88,7 @@ class GrowyaAnalyticsController extends Controller
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->whereNull('orders.deleted_at')->whereBetween('orders.created_at', [$from, $to])
             ->where('orders.payment_status', 'paid')->where('orders.status', '!=', 'cancelled')
-            ->when($business, fn($q) => $q->where('orders.business_id', $business->id))
+            ->when($business, fn ($q) => $q->where('orders.business_id', $business->id))
             ->selectRaw('order_items.product_id, MAX(order_items.product_name) AS product_name, SUM(order_items.quantity) AS units, SUM(order_items.total_price) AS gross_item_value')
             ->groupBy('order_items.product_id')->orderByDesc('units')->limit(10)->get();
         $statuses = $scope($range(DB::table('orders')->whereNull('deleted_at')))
@@ -104,6 +98,7 @@ class GrowyaAnalyticsController extends Controller
             ->whereNull('orders.deleted_at')->whereBetween('orders.created_at', [$from, $to])
             ->selectRaw("businesses.id, businesses.name, COUNT(orders.id) AS order_count, SUM(CASE WHEN orders.payment_status = 'paid' AND orders.status != 'cancelled' THEN orders.total_amount ELSE 0 END) AS paid_sales")
             ->groupBy('businesses.id', 'businesses.name')->orderByDesc('paid_sales')->limit(15)->get();
+
         return compact('stats', 'series', 'topProducts', 'statuses', 'businessPerformance');
     }
 
@@ -111,6 +106,7 @@ class GrowyaAnalyticsController extends Controller
     {
         $this->authorizeOwner($request, $business);
         [$from, $to] = $this->dates($request);
+
         return view('growya-analytics.dashboard', array_merge(
             $this->report($from, $to, $business),
             compact('from', 'to', 'business')
@@ -122,6 +118,7 @@ class GrowyaAnalyticsController extends Controller
         $this->authorizeAdmin($request);
         [$from, $to] = $this->dates($request);
         $business = null;
+
         return view('growya-analytics.dashboard', array_merge(
             $this->report($from, $to, null),
             compact('from', 'to', 'business')
@@ -132,6 +129,7 @@ class GrowyaAnalyticsController extends Controller
     {
         $this->authorizeOwner($request, $business);
         [$from, $to] = $this->dates($request);
+
         return $this->csv($from, $to, $business);
     }
 
@@ -139,24 +137,29 @@ class GrowyaAnalyticsController extends Controller
     {
         $this->authorizeAdmin($request);
         [$from, $to] = $this->dates($request);
+
         return $this->csv($from, $to, null);
     }
 
     private function csv(Carbon $from, Carbon $to, ?Business $business): StreamedResponse
     {
-        $name = 'growya-orders-' . ($business?->id ?? 'platform') . '-' . $from->format('Ymd') . '-' . $to->format('Ymd') . '.csv';
+        $name = 'growya-orders-'.($business?->id ?? 'platform').'-'.$from->format('Ymd').'-'.$to->format('Ymd').'.csv';
+
         return response()->streamDownload(function () use ($from, $to, $business) {
             $fp = fopen('php://output', 'w');
             fwrite($fp, "\xEF\xBB\xBF");
             fputcsv($fp, ['Order ID', 'Order Number', 'Business ID', 'Created At', 'Status', 'Payment Status', 'Subtotal', 'Discount', 'Tax', 'Total']);
             $q = DB::table('orders')->whereNull('deleted_at')->whereBetween('created_at', [$from, $to]);
-            if ($business) $q->where('business_id', $business->id);
+            if ($business) {
+                $q->where('business_id', $business->id);
+            }
             $q->orderBy('id')->chunk(500, function ($orders) use ($fp) {
                 foreach ($orders as $o) {
                     $safe = static function ($value) {
                         $v = (string) ($value ?? '');
+
                         // Prevent spreadsheet formula injection from user-provided data.
-                        return preg_match('/^\s*[=+@\-\t\r]/u', $v) ? "'" . $v : $v;
+                        return preg_match('/^\s*[=+@\-\t\r]/u', $v) ? "'".$v : $v;
                     };
                     fputcsv($fp, [$o->id, $safe($o->order_number), $o->business_id, $o->created_at, $safe($o->status), $safe($o->payment_status), $o->subtotal, $o->discount_amount, $o->tax_amount, $o->total_amount]);
                 }

@@ -7,7 +7,6 @@ use App\Models\Review;
 use App\Services\BusinessAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class BusinessReviewController extends Controller
@@ -30,6 +29,7 @@ class BusinessReviewController extends Controller
             ->where('status', 'approved')->selectRaw('COUNT(*) as total, AVG(rating) as average_rating')->first();
         $myReview = auth()->check() ? Review::query()->where('business_id', $business->id)
             ->where('user_id', auth()->id())->first() : null;
+
         return view('public.reviews.index', compact('business', 'reviews', 'summary', 'myReview'));
     }
 
@@ -57,6 +57,7 @@ class BusinessReviewController extends Controller
                 'helpful_count' => 0,
             ]);
         }, 3);
+
         return back()->with('success', 'Review submitted for moderation.');
     }
 
@@ -70,24 +71,27 @@ class BusinessReviewController extends Controller
             'review' => ['required', 'string', 'min:5', 'max:3000'],
         ]);
         $review->update(['rating' => $data['rating'], 'review' => trim($data['review']), 'status' => 'pending']);
+
         return back()->with('success', 'Review updated and sent for moderation.');
     }
 
     public function ownerIndex(Business $business)
     {
-        abort_unless(auth()->check() && $this->access->can(auth()->user(), $business, 'services.view'), 403);
+        abort_unless(auth()->check() && $this->access->can(auth()->user(), $business, 'reviews.view'), 403);
         $reviews = Review::query()->where('business_id', $business->id)
             ->with('user:id,name')->latest('id')->paginate(20);
+
         return view('businesses.reviews.index', compact('business', 'reviews'));
     }
 
     public function reply(Request $request, Business $business, Review $review)
     {
-        abort_unless(auth()->check() && $this->access->can(auth()->user(), $business, 'services.update'), 403);
+        abort_unless(auth()->check() && $this->access->can(auth()->user(), $business, 'reviews.manage'), 403);
         abort_unless((int) $review->business_id === (int) $business->id, 404);
         $data = $request->validate(['business_reply' => ['required', 'string', 'min:2', 'max:2000']]);
         abort_unless($review->status === 'approved', 422, 'Only approved reviews can be replied to.');
         $review->update(['business_reply' => trim($data['business_reply']), 'replied_at' => now()]);
+
         return back()->with('success', 'Business reply saved.');
     }
 }

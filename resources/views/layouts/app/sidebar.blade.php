@@ -28,43 +28,43 @@
 
         $businessMenu = [
             ['Overview', 'businesses.show', 'store', 'business.view'],
-            ['Customer CRM', 'growya.crm.index', 'users', 'business.view'],
-            ['Lead Insights', 'growya.lead-insights.owner', 'grid', 'business.view'],
+            ['Customer CRM', 'growya.crm.index', 'users', 'customers.view'],
+            ['Lead Insights', 'growya.lead-insights.owner', 'grid', 'leads.view'],
             ['Customer messages', 'growya.chat.inbox', 'chat', 'chats.view'],
-            ['KYC & Documents', 'growya.kyc.owner', 'shield', 'business.view'],
-            ['Subscription billing', 'growya.billing.owner', 'wallet', 'business.view'],
-            ['Analytics & Reports', 'growya.analytics.owner', 'grid', 'business.view'],
-            ['Coupons & Discounts', 'businesses.coupons.index', 'tag', 'business.update'],
-            ['Plan usage', 'growya.entitlements.usage', 'chart', 'business.view'],
-            ['Subscription plans', 'growya.subscriptions.business', 'wallet', 'business.view'],
+            ['KYC & Documents', 'growya.kyc.owner', 'shield', 'documents.view'],
+            ['Subscription billing', 'growya.billing.owner', 'wallet', 'billing.view'],
+            ['Analytics & Reports', 'growya.analytics.owner', 'grid', 'analytics.view'],
+            ['Coupons & Discounts', 'businesses.coupons.index', 'tag', 'coupons.view'],
+            ['Plan usage', 'growya.entitlements.usage', 'chart', 'subscriptions.view'],
+            ['Subscription plans', 'growya.subscriptions.business', 'wallet', 'subscriptions.view'],
             ['Map Location', 'growya.nearby.location.edit', 'pin', 'business.update'],
-            ['Paid promotions', 'growya.promotions.owner', 'tag', 'business.view'],
+            ['Paid promotions', 'growya.promotions.owner', 'tag', 'promotions.view'],
             ['Products', 'businesses.products.index', 'box', 'products.view'],
             ['Services', 'businesses.services.index', 'sparkles', 'services.view'],
-            ['Orders', 'businesses.orders.index', 'bag', 'products.view'],
-            ['Payments', 'businesses.payments.index', 'wallet', 'products.view'],
-            ['Returns & refunds', 'businesses.returns.index', 'return', 'products.view'],
-            ['Delivery management', 'businesses.delivery.index', 'truck', 'products.view'],
-            ['Product enquiries', 'businesses.product-enquiries.index', 'chat', 'products.view'],
-            ['Service enquiries', 'businesses.service-enquiries.index', 'chat', 'services.view'],
-            ['Appointments', 'businesses.appointments.index', 'calendar', 'services.view'],
-            ['Offers & promotions', 'businesses.offers.index', 'tag', 'services.view'],
-            ['Gallery', 'businesses.gallery.index', 'photo', 'services.view'],
-            ['Reviews', 'businesses.reviews.index', 'star', 'services.view'],
-            ['Business hours', 'businesses.hours.index', 'clock', 'business.view'],
-            ['Social links', 'businesses.social-links.index', 'link', 'business.view'],
+            ['Orders', 'businesses.orders.index', 'bag', 'orders.view'],
+            ['Payments', 'businesses.payments.index', 'wallet', 'payments.view'],
+            ['Returns & refunds', 'businesses.returns.index', 'return', 'returns.view'],
+            ['Delivery management', 'businesses.delivery.index', 'truck', 'delivery.view'],
+            ['Product enquiries', 'businesses.product-enquiries.index', 'chat', 'product_enquiries.view'],
+            ['Service enquiries', 'businesses.service-enquiries.index', 'chat', 'service_enquiries.view'],
+            ['Appointments', 'businesses.appointments.index', 'calendar', 'appointments.view'],
+            ['Offers & promotions', 'businesses.offers.index', 'tag', 'offers.view'],
+            ['Gallery', 'businesses.gallery.index', 'photo', 'gallery.view'],
+            ['Reviews', 'businesses.reviews.index', 'star', 'reviews.view'],
+            ['Business hours', 'businesses.hours.index', 'clock', 'business.hours.manage'],
+            ['Social links', 'businesses.social-links.index', 'link', 'business.social.manage'],
         ];
 
         $adminMenu = [
             ['Business approvals', 'admin.business-verifications.index', 'admin.business-verifications.*', 'shield'],
             ['All businesses', 'businesses.index', 'businesses.index', 'store'],
-            ['Lead Insights', 'growya.lead-insights.admin', 'growya.lead-insights.admin*', 'grid'],
+            ['Lead Insights', 'growya.lead-insights.admin', 'growya.lead-insights.admin*', 'leads.view'],
             ['Referrals & Rewards', 'growya.referrals.admin', 'growya.referrals.admin', 'users'],
-            ['Subscription billing', 'growya.billing.admin', 'growya.billing.admin', 'wallet'],
+            ['Subscription billing', 'growya.billing.admin', 'growya.billing.admin', 'billing.view'],
             ['Chat moderation', 'growya.chat.reports', 'growya.chat.reports*', 'shield'],
             ['Business claims', 'growya.claims.admin', 'growya.claims.admin*', 'shield'],
             ['Business KYC Reviews', 'growya.kyc.admin', 'growya.kyc.admin*', 'shield'],
-            ['Analytics & Reports', 'growya.analytics.admin', 'growya.analytics.admin*', 'grid'],
+            ['Analytics & Reports', 'growya.analytics.admin', 'growya.analytics.admin*', 'analytics.view'],
             ['Users', 'users.index', 'users.*', 'users'],
             ['User roles', 'growya.users.roles.index', 'growya.users.roles.*', 'users'],
             ['Access control', 'growya.roles.matrix', 'growya.roles.matrix*', 'shield'],
@@ -165,11 +165,12 @@
         {{-- Business Management --}}
         @if ($hasBusinessAccess)
             <p class="g-sidebar-label">Business management</p>
+            <nav class="my-3">@foreach(['categories','attributes'] as $kind) @if($access->can($sidebarUser,$sidebarBusiness,$kind.'.view'))<a class="g-nav-item" href="{{ route('businesses.catalog.index',[$sidebarBusiness,$kind]) }}">{{ ucfirst($kind) }}</a>@endif @endforeach</nav>
             @if ($sidebarBusiness->verification_status === 'approved')
                 <nav>
                     @foreach ($businessMenu as [$label, $routeName, $icon, $permission])
                         @if (Route::has($routeName) && $access->can($sidebarUser, $sidebarBusiness, $permission))
-                            @if ($routeName !== 'growya.subscriptions.business' || $isSuperAdmin || $isBusinessOwner)
+                            @if (true)
                                 @php
                                     $current =
                                         request()->routeIs($routeName) ||
@@ -185,7 +186,7 @@
                         @endif
                     @endforeach
 
-                    @if (Route::has('businesses.wishlist.index') && ($isSuperAdmin || $isBusinessOwner))
+                    @if (Route::has('businesses.wishlist.index') && $access->can($sidebarUser, $sidebarBusiness, 'wishlist.view'))
                         @php $wishlistCurrent = request()->routeIs('businesses.wishlist.*'); @endphp
                         <a class="g-nav-item {{ $wishlistCurrent ? 'is-current' : '' }}"
                             href="{{ route('businesses.wishlist.index', $sidebarBusiness) }}"
@@ -203,7 +204,7 @@
                         </a>
                     @endif
 
-                    @if ($access->canManageStaff($sidebarUser, $sidebarBusiness))
+                    @if ($access->can($sidebarUser, $sidebarBusiness, 'staff.view'))
                         @php $staffCurrent = request()->routeIs('businesses.staff.*'); @endphp
                         <a class="g-nav-item {{ $staffCurrent ? 'is-current' : '' }}"
                             href="{{ route('businesses.staff.index', $sidebarBusiness) }}"
@@ -213,7 +214,7 @@
                     @endif
 
 
-                    @if (Route::has('growya.crm.staff.dashboard'))
+                    @if (Route::has('growya.crm.staff.dashboard') && $access->can($sidebarUser, $sidebarBusiness, 'customers.view'))
                         @php $staffCrmCurrent = request()->routeIs('growya.crm.staff.*'); @endphp
                         <a class="g-nav-item {{ $staffCrmCurrent ? 'is-current' : '' }}"
                             href="{{ route('growya.crm.staff.dashboard', $sidebarBusiness) }}"
@@ -222,7 +223,7 @@
                         </a>
                     @endif
 
-                    @if (isset($sidebarBusiness) && $sidebarBusiness)
+                    @if ($sidebarBusiness && $access->can($sidebarUser, $sidebarBusiness, 'customers.view'))
                         <a class="g-nav-item {{ request()->routeIs('growya.crm.kanban.*') ? 'is-current' : '' }}"
                             href="{{ route('growya.crm.kanban.index', ['business' => $sidebarBusiness->id]) }}"
                             wire:navigate>
@@ -231,7 +232,7 @@
                         </a>
                     @endif
 
-                    @if (Route::has('growya.crm.incentives.index'))
+                    @if (Route::has('growya.crm.incentives.index') && $access->can($sidebarUser, $sidebarBusiness, 'incentives.view'))
                         @php $incentivesCurrent = request()->routeIs('growya.crm.incentives.*'); @endphp
                         <a class="g-nav-item {{ $incentivesCurrent ? 'is-current' : '' }}"
                             href="{{ route('growya.crm.incentives.index', $sidebarBusiness) }}"
@@ -239,7 +240,7 @@
                             <x-growya.icon name="wallet" />CRM Incentives
                         </a>
                     @endif
-                    @if (Route::has('growya.finance.index') && ($isSuperAdmin || $isBusinessOwner))
+                    @if (Route::has('growya.finance.index') && $access->can($sidebarUser, $sidebarBusiness, 'finance.view'))
                         @php $financeCurrent = request()->routeIs('growya.finance.*'); @endphp
                         <a class="g-nav-item {{ $financeCurrent ? 'is-current' : '' }}"
                             href="{{ route('growya.finance.index', $sidebarBusiness) }}"

@@ -56,7 +56,7 @@ class ServiceEnquiryController extends Controller
     ) {
         $this->authorizeBusiness(
             $business,
-            'services.view'
+            'service_enquiries.view'
         );
 
         $query = ServiceEnquiry::query()
@@ -73,8 +73,8 @@ class ServiceEnquiryController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('message', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('message', 'like', "%{$search}%");
             });
         }
 
@@ -165,7 +165,7 @@ class ServiceEnquiryController extends Controller
     ) {
         $this->authorizeBusiness(
             $business,
-            'services.view'
+            'service_enquiries.view'
         );
 
         $enquiry = $this->scopedEnquiry(
@@ -173,16 +173,16 @@ class ServiceEnquiryController extends Controller
             $enquiry
         );
 
-       $enquiry->load([
-    'service:id,name,business_id',
-    'user:id,name',
-    'followUps' => fn ($query) => $query
-        ->with([
-            'creator:id,name',
-            'completedBy:id,name',
-        ])
-        ->latest('id'),
-]);
+        $enquiry->load([
+            'service:id,name,business_id',
+            'user:id,name',
+            'followUps' => fn ($query) => $query
+                ->with([
+                    'creator:id,name',
+                    'completedBy:id,name',
+                ])
+                ->latest('id'),
+        ]);
 
         return view('services.enquiries.show', compact(
             'business',
@@ -197,7 +197,7 @@ class ServiceEnquiryController extends Controller
     ) {
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'service_enquiries.manage'
         );
 
         $enquiry = $this->scopedEnquiry(

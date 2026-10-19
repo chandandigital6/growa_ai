@@ -7,7 +7,13 @@ use Livewire\WithPagination;
 
 new class extends Component {
     use WithPagination;
+    public function boot(): void
+    {
+        abort_unless(auth()->user()?->status === 'active' && auth()->user()?->hasRole('super_admin', 'web'), 403);
+    }
 
+
+    #[\Livewire\Attributes\Locked]
     public $userId = null;
     public $name = '';
     public $email = '';
@@ -25,7 +31,7 @@ new class extends Component {
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $this->userId,
-            'password' => $this->userId ? 'nullable|min:6|confirmed' : 'required|min:6|confirmed',
+            'password' => $this->userId ? 'nullable|min:12|confirmed' : 'required|min:12|confirmed',
         ];
     }
 
@@ -89,7 +95,10 @@ new class extends Component {
 
     public function delete($id)
     {
-        User::findOrFail($id)->delete();
+        $user = User::findOrFail($id);
+        abort_if($user->hasRole('super_admin', 'web') || (int)$user->id === (int)auth()->id(), 403, 'This account is protected.');
+        abort_if($user->ownedBusinesses()->exists(), 422, 'Transfer business ownership before deleting this account.');
+        $user->delete();
 
         session()->flash('success', 'User deleted successfully.');
     }

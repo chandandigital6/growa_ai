@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Services\BusinessAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -13,9 +14,7 @@ class GrowyaFinanceController extends Controller
 {
     private function authorizeOwner(Request $request, Business $business): void
     {
-        $user = $request->user();
-        abort_unless($user && ($user->hasRole('super_admin', 'web') ||
-            ($user->status === 'active' && (int)$business->owner_id === (int)$user->id)), 403);
+        abort_unless(auth()->user() && app(BusinessAccessService::class)->can(auth()->user(), $business, 'finance.view'), 403);
     }
 
     private function period(Request $request): array
@@ -27,6 +26,7 @@ class GrowyaFinanceController extends Controller
         $from = $validated['from'] ?? now()->startOfMonth()->toDateString();
         $to = $validated['to'] ?? now()->toDateString();
         abort_if($from > $to, 422, 'Start date must not exceed end date.');
+
         return [$from, $to];
     }
 
@@ -47,21 +47,22 @@ class GrowyaFinanceController extends Controller
 
     private function summary(Business $business, string $from, string $to): array
     {
-        $manualIncome = (float)$this->entryQuery($business, $from, $to)->where('e.kind', 'income')->sum('e.amount');
-        $manualExpenses = (float)$this->entryQuery($business, $from, $to)->where('e.kind', 'expense')->sum('e.amount');
+        $manualIncome = (float) $this->entryQuery($business, $from, $to)->where('e.kind', 'income')->sum('e.amount');
+        $manualExpenses = (float) $this->entryQuery($business, $from, $to)->where('e.kind', 'expense')->sum('e.amount');
         // Order statuses are not immutable payment receipts: show this as a paid-order indicator only.
         // Exclude cancelled/refunded/returned states, but separately reconciled partial refunds still require accounting.
         $orders = DB::table('orders')->where('business_id', $business->id)->whereNull('deleted_at')
             ->whereBetween(DB::raw('DATE(created_at)'), [$from, $to])
             ->where('payment_status', 'paid')
             ->whereNotIn('status', ['cancelled', 'canceled', 'refunded', 'returned']);
-        $paidOrderRevenue = (float)$orders->sum('total_amount');
+        $paidOrderRevenue = (float) $orders->sum('total_amount');
         // Legacy installs may not have the latest incentives migration installed yet.
         $paidIncentives = Schema::hasTable('growya_crm_incentive_claims')
-            ? (float)DB::table('growya_crm_incentive_claims')
+            ? (float) DB::table('growya_crm_incentive_claims')
                 ->where('business_id', $business->id)->where('status', 'paid')
                 ->whereNotNull('paid_at')->whereDate('paid_at', '>=', $from)
                 ->whereDate('paid_at', '<=', $to)->sum('incentive_amount') : 0.0;
+
         return compact('manualIncome', 'manualExpenses', 'paidOrderRevenue', 'paidIncentives') + [
             'totalIncome' => $manualIncome + $paidOrderRevenue,
             'totalExpenses' => $manualExpenses + $paidIncentives,
@@ -77,9 +78,13 @@ class GrowyaFinanceController extends Controller
         $categories = $this->categoryQuery($business)->orderBy('kind')->orderBy('name')->get();
         $entries = $this->entryQuery($business, $from, $to)
             ->select('e.*', 'c.name as category_name')->orderByDesc('e.entry_date')->orderByDesc('e.id')->paginate(20)->withQueryString();
+        $monthExpression = DB::getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', e.entry_date)"
+            : "DATE_FORMAT(e.entry_date,'%Y-%m')";
         $months = $this->entryQuery($business, $from, $to)
-            ->selectRaw("DATE_FORMAT(e.entry_date,'%Y-%m') as month, e.kind, SUM(e.amount) as amount")
+            ->selectRaw($monthExpression.' as month, e.kind, SUM(e.amount) as amount')
             ->groupBy('month', 'e.kind')->orderBy('month')->get();
+
         return view('growya-finance.index', compact('business', 'from', 'to', 'summary', 'categories', 'entries', 'months'));
     }
 
@@ -92,6 +97,7 @@ class GrowyaFinanceController extends Controller
             ['business_id' => $business->id, 'kind' => $v['kind'], 'name' => $name],
             ['updated_at' => now(), 'created_at' => now()]
         );
+
         return back()->with('success', 'Category saved.');
     }
 
@@ -107,7 +113,7 @@ class GrowyaFinanceController extends Controller
             'reference' => ['nullable', 'string', 'max:140'],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
-        if (!empty($v['category_id'])) {
+        if (! empty($v['category_id'])) {
             abort_unless($this->categoryQuery($business)->where('id', $v['category_id'])->where('kind', $v['kind'])->exists(), 422, 'Invalid category.');
         }
         DB::table('growya_finance_entries')->insert([
@@ -124,6 +130,7 @@ class GrowyaFinanceController extends Controller
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
         return back()->with('success', 'Entry saved. Do not re-enter order receipts or paid incentives as manual records.');
     }
 
@@ -145,6 +152,7 @@ class GrowyaFinanceController extends Controller
             'description' => $v['description'] ?? null,
             'updated_at' => now(),
         ]);
+
         return back()->with('success', 'Entry updated.');
     }
 
@@ -155,6 +163,7 @@ class GrowyaFinanceController extends Controller
             ->whereNull('deleted_at')->whereNull('source_key')->where('id', $entry)
             ->update(['deleted_at' => now(), 'updated_at' => now()]);
         abort_unless($updated, 404);
+
         return back()->with('success', 'Entry archived.');
     }
 
@@ -163,22 +172,26 @@ class GrowyaFinanceController extends Controller
         $this->authorizeOwner($request, $business);
         [$from, $to] = $this->period($request);
         $summary = $this->summary($business, $from, $to);
+
         return response()->streamDownload(function () use ($business, $from, $to, $summary) {
             $out = fopen('php://output', 'w');
             fputcsv($out, ['Growya financial overview', 'Business ID', $business->id, 'From', $from, 'To', $to]);
-            foreach ($summary as $key => $value) fputcsv($out, [$key, number_format($value, 2, '.', '')]);
+            foreach ($summary as $key => $value) {
+                fputcsv($out, [$key, number_format($value, 2, '.', '')]);
+            }
             fputcsv($out, []);
             fputcsv($out, ['Date', 'Type', 'Category', 'Amount', 'Method', 'Reference', 'Description']);
             $query = $this->entryQuery($business, $from, $to)->select('e.*', 'c.name as category_name')->orderBy('e.id');
             foreach ($query->cursor() as $e) {
                 // Prevent CSV formula injection when opened in spreadsheet software.
                 $safe = function ($s) {
-                    $s = (string)($s ?? '');
-                    return preg_match('/^[\s]*[=+@\-]/u', $s) ? "'" . $s : $s;
+                    $s = (string) ($s ?? '');
+
+                    return preg_match('/^[\s]*[=+@\-]/u', $s) ? "'".$s : $s;
                 };
                 fputcsv($out, [$e->entry_date, $e->kind, $safe($e->category_name), $e->amount, $e->payment_method, $safe($e->reference), $safe($e->description)]);
             }
             fclose($out);
-        }, 'growya-finance-' . $business->id . '-' . $from . '-' . $to . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }, 'growya-finance-'.$business->id.'-'.$from.'-'.$to.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

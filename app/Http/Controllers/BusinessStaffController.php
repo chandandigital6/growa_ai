@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Models\BusinessStaffAudit;
 use App\Models\BusinessUser;
 use App\Models\User;
 use App\Services\BusinessAccessService;
+use App\Services\GrowyaPlanLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -14,248 +16,151 @@ use Spatie\Permission\Models\Permission;
 
 class BusinessStaffController extends Controller
 {
-    private function authorizeManager(Business $business): void
+    private function authorizeManager(Business $business, string $permission = 'staff.manage'): void
     {
-        $user = auth()->user();
-
-        abort_unless($user, 401);
-
-        abort_unless(
-            app(BusinessAccessService::class)->canManageStaff($user, $business),
-            403,
-            'Only the active owner of an approved business can manage staff.'
-        );
+        abort_unless(auth()->user() && app(BusinessAccessService::class)->can(auth()->user(), $business, $permission), 403);
     }
 
     private function roles(): array
     {
-        return [
-            'admin' => 'Business Admin',
-            'manager' => 'Manager',
-            'staff' => 'Staff',
-            'marketing' => 'Marketing',
-            'sales' => 'Sales',
-        ];
+        return ['admin' => 'Business Admin', 'manager' => 'Manager', 'staff' => 'Staff', 'marketing' => 'Marketing', 'sales' => 'Sales'];
     }
 
-    private function permissions()
+    private function owner(Business $business): bool
     {
-        // Only business-module permissions can be assigned.
-        $names = [
-            'business.view',
-            'products.view',
-            'products.create',
-            'products.update',
-            'products.delete',
-            'services.view',
-            'services.create',
-            'services.update',
-            'services.delete',
-            'orders.view',
-            'orders.manage',
-            'customers.view',
-            'customers.manage',
-            'staff.view',
-            'reviews.view',
-            'reviews.manage',
-            'offers.view',
-            'offers.manage',
-            'analytics.view',
-            'social.view',
-            'social.manage',
-            'ai.use',
-            'subscriptions.view',
-            'gallery.view',
-            'gallery.manage',
-            'business.hours.manage',
-            'business.social.manage',
-        ];
+        return auth()->user()->hasRole('super_admin', 'web') || (int) $business->owner_id === (int) auth()->id();
+    }
 
-        return Permission::query()
-            ->where('guard_name', 'web')
-            ->whereIn('name', $names)
-            ->orderBy('name')
-            ->get(['id', 'name']);
+    private function permissions(Business $business)
+    {
+        $query = Permission::where('guard_name', 'web')->whereIn('name', config('business_permissions.permissions'));
+        if (! $this->owner($business)) {
+            $ids = app(BusinessAccessService::class)->membership(auth()->user(), $business)?->permissions()->pluck('permissions.id')->all() ?? [];
+            $query->whereIn('id', $ids);
+        }
+
+        return $query->orderBy('name')->get(['id', 'name']);
+    }
+
+    private function ids(Request $request, Business $business): array
+    {
+        $ids = array_map('intval', $request->input('permissions', []));
+        if (array_diff($ids, $this->permissions($business)->pluck('id')->all())) {
+            throw ValidationException::withMessages(['permissions' => 'You may assign only business permissions you hold in this business.']);
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    private function checkMember(Business $business, BusinessUser $member): void
+    {
+        abort_unless((int) $member->business_id === (int) $business->id, 404);
+        abort_if($member->role === 'owner' || (int) $member->user_id === (int) $business->owner_id, 403, 'Owner is protected.');
+        if (! $this->owner($business)) {
+            abort_if((int) $member->user_id === (int) auth()->id(), 403, 'You cannot change your own access.');
+            abort_if(array_diff($member->permissions()->pluck('permissions.id')->all(), $this->permissions($business)->pluck('id')->all()), 403, 'This member holds permissions outside your authority.');
+        }
+    }
+
+    private function audit(Business $business, BusinessUser $member, string $action, ?array $before = null): void
+    {
+        DB::table('business_staff_audits')->insert([
+            'business_id' => $business->id, 'actor_user_id' => auth()->id(), 'subject_user_id' => $member->user_id,
+            'action' => $action, 'before_data' => $before ? json_encode($before) : null,
+            'after_data' => $action === 'removed' ? null : json_encode(['role' => $member->role, 'is_active' => $member->is_active, 'permissions' => $member->permissions()->pluck('name')->all()]),
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
     }
 
     public function index(Business $business)
     {
-        $this->authorizeManager($business);
-
-        $staff = $business->businessUsers()
-            ->with(['user:id,name,email,phone', 'permissions'])
-            ->orderByRaw("CASE WHEN role = 'owner' THEN 0 ELSE 1 END")
-            ->latest('id')
-            ->paginate(15);
-
+        $this->authorizeManager($business, 'staff.view');
+        $staff = $business->businessUsers()->with(['user:id,name,email,phone', 'permissions'])->orderBy('id')->paginate(15);
         $roles = $this->roles();
-        $permissions = $this->permissions();
+        $permissions = $this->permissions($business);
+        $canManage = app(BusinessAccessService::class)->can(auth()->user(), $business, 'staff.manage');
 
-        return view(
-            'businesses.staff.index',
-            compact('business', 'staff', 'roles', 'permissions')
-        );
+        return view('businesses.staff.index', compact('business', 'staff', 'roles', 'permissions', 'canManage'));
     }
 
     public function store(Request $request, Business $business)
     {
         $this->authorizeManager($business);
-
         $data = $request->validate([
-            'email' => ['required', 'email', 'max:255'],
-            'role' => [
-                'required',
-                Rule::in(array_keys($this->roles())),
-            ],
-            'permissions' => ['sometimes', 'array'],
-            'permissions.*' => ['integer', 'distinct'],
+            'email' => ['required', 'email', 'max:255'], 'name' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'regex:/^[6-9][0-9]{9}$/'],
+            'password' => ['nullable', 'string', 'min:12', 'confirmed'],
+            'role' => ['required', Rule::in(array_keys($this->roles()))],
+            'permissions' => ['sometimes', 'array'], 'permissions.*' => ['integer', 'distinct'],
         ]);
-
-        $user = User::query()
-            ->where('email', $data['email'])
-            ->where('status', 'active')
-            ->first();
-
-        if (!$user) {
-            throw ValidationException::withMessages([
-                'email' => 'Active registered user not found.',
-            ]);
-        }
-
-        if ((int) $business->owner_id === (int) $user->id) {
-            throw ValidationException::withMessages([
-                'email' => 'Business owner already has owner access.',
-            ]);
-        }
-
-        $exists = BusinessUser::query()
-            ->where('business_id', $business->id)
-            ->where('user_id', $user->id)
-            ->exists();
-
-        if ($exists) {
-            throw ValidationException::withMessages([
-                'email' => 'This user is already a member.',
-            ]);
-        }
-
-        $permissionIds = $this->validatePermissionIds(
-            $data['permissions'] ?? []
-        );
-
-        DB::transaction(function () use (
-            $business, $user, $data, $permissionIds
-        ) {
-            \App\Models\Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
-            app(\App\Services\GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_staff');
-            $member = $business->businessUsers()->create([
-                'user_id' => $user->id,
-                'role' => $data['role'],
-                'is_active' => true,
-                'joined_at' => now(),
-            ]);
-
-            $member->permissions()->sync($permissionIds);
-        });
-
-        return redirect()
-            ->route('businesses.staff.index', $business)
-            ->with('success', 'Staff added successfully.');
-    }
-
-    public function update(
-        Request $request,
-        Business $business,
-        BusinessUser $member
-    ) {
-        $this->authorizeManager($business);
-        $this->checkMember($business, $member);
-
-        $data = $request->validate([
-            'role' => [
-                'required',
-                Rule::in(array_keys($this->roles())),
-            ],
-            'is_active' => ['required', 'boolean'],
-            'permissions' => ['sometimes', 'array'],
-            'permissions.*' => ['integer', 'distinct'],
-        ]);
-
-        $permissionIds = $this->validatePermissionIds(
-            $data['permissions'] ?? []
-        );
-
-        DB::transaction(function () use (
-            $member, $data, $permissionIds, $business
-        ) {
-            $lockedBusiness = Business::query()->whereKey($business->id)->lockForUpdate()->firstOrFail();
-            $lockedMember = BusinessUser::query()->whereKey($member->id)->lockForUpdate()->firstOrFail();
-            if (!$lockedMember->is_active && (bool) $data['is_active']) {
-                app(\App\Services\GrowyaPlanLimitService::class)->assertCanAdd($lockedBusiness, 'max_staff');
+        $ids = $this->ids($request, $business);
+        DB::transaction(function () use ($business, $data, $ids) {
+            Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
+            $user = User::where('email', $data['email'])->first();
+            if (! $user) {
+                validator($data, [
+                    'name' => ['required', 'string', 'max:255'], 'phone' => ['required', Rule::unique('users', 'phone')],
+                    'password' => ['required', 'string', 'min:12'],
+                ])->validate();
+                $user = User::create(['name' => $data['name'], 'email' => $data['email'], 'phone' => $data['phone'], 'password' => $data['password'], 'user_type' => 'staff', 'status' => 'active']);
+                // No global owner/admin role is granted by business membership.
             }
-            $member->update([
-                'role' => $data['role'],
-                'is_active' => (bool) $data['is_active'],
-            ]);
-
-            $member->permissions()->sync($permissionIds);
+            if ($user->status !== 'active' || $user->hasRole('super_admin', 'web') || (int) $business->owner_id === (int) $user->id) {
+                throw ValidationException::withMessages(['email' => 'Choose an active non-owner, non-super-admin account.']);
+            }
+            if ($business->businessUsers()->where('user_id', $user->id)->exists()) {
+                throw ValidationException::withMessages(['email' => 'This account is already a member.']);
+            }
+            app(GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_staff');
+            $member = $business->businessUsers()->create(['user_id' => $user->id, 'role' => $data['role'], 'is_active' => true, 'joined_at' => now()]);
+            $member->permissions()->sync($ids);
+            $this->audit($business, $member, 'created');
         });
 
-        return back()->with(
-            'success',
-            'Staff updated successfully.'
-        );
+        return back()->with('success', 'Staff account added. Existing account credentials are never changed.');
     }
 
-    public function destroy(
-        Business $business,
-        BusinessUser $member
-    ) {
-        $this->authorizeManager($business);
-        $this->checkMember($business, $member);
-
-        $member->delete();
-
-        return redirect()
-            ->route('businesses.staff.index', $business)
-            ->with('success', 'Staff removed successfully.');
-    }
-
-    private function checkMember(
-        Business $business,
-        BusinessUser $member
-    ): void {
-        abort_unless(
-            (int) $member->business_id === (int) $business->id,
-            404
-        );
-
-        // Business owner can never be managed here.
-        abort_if(
-            (int) $member->user_id === (int) $business->owner_id
-            || $member->role === 'owner',
-            403,
-            'Business owner cannot be modified here.'
-        );
-    }
-
-    private function validatePermissionIds(array $ids): array
+    public function update(Request $request, Business $business, BusinessUser $member)
     {
-        $ids = array_values(array_unique(
-            array_map('intval', $ids)
-        ));
+        $this->authorizeManager($business);
+        $data = $request->validate(['role' => ['required', Rule::in(array_keys($this->roles()))], 'is_active' => ['required', 'boolean'], 'permissions' => ['sometimes', 'array'], 'permissions.*' => ['integer', 'distinct']]);
+        $ids = $this->ids($request, $business);
+        DB::transaction(function () use ($business, $member, $data, $ids) {
+            Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
+            $member = BusinessUser::whereKey($member->id)->lockForUpdate()->firstOrFail();
+            $this->checkMember($business, $member);
+            $before = ['role' => $member->role, 'is_active' => $member->is_active, 'permissions' => $member->permissions()->pluck('name')->all()];
+            if (! $member->is_active && $data['is_active']) {
+                app(GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_staff');
+            }
+            $member->update(['role' => $data['role'], 'is_active' => (bool) $data['is_active']]);
+            $member->permissions()->sync($ids);
+            $this->audit($business, $member, 'updated', $before);
+        });
 
-        $allowed = $this->permissions()
-            ->pluck('id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
+        return back()->with('success', 'Staff permissions updated.');
+    }
 
-        if (array_diff($ids, $allowed)) {
-            throw ValidationException::withMessages([
-                'permissions' => 'Invalid business permission selected.',
-            ]);
-        }
+    public function destroy(Business $business, BusinessUser $member)
+    {
+        $this->authorizeManager($business);
+        DB::transaction(function () use ($business, $member) {
+            Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
+            $member = BusinessUser::whereKey($member->id)->lockForUpdate()->firstOrFail();
+            $this->checkMember($business, $member);
+            $this->audit($business, $member, 'removed', ['role' => $member->role, 'permissions' => $member->permissions()->pluck('name')->all()]);
+            $member->permissions()->detach();
+            $member->delete();
+        });
 
-        return $ids;
+        return back()->with('success', 'Staff removed from this business.');
+    }
+
+    public function history(Business $business)
+    {
+        $this->authorizeManager($business, 'staff.view');
+        $audits = BusinessStaffAudit::with(['actor', 'subject'])->where('business_id',$business->id)->orderByDesc('id')->paginate(25);
+
+        return view('businesses.staff.history',compact('business','audits'));
     }
 }

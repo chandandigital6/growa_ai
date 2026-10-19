@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Business;
+use App\Services\BusinessAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 class BusinessSocialLinkController extends Controller
@@ -26,7 +26,7 @@ class BusinessSocialLinkController extends Controller
 
     public function index(Business $business)
     {
-        Gate::authorize('view', $business);
+        abort_unless(app(BusinessAccessService::class)->can(auth()->user(), $business, 'business.social.manage'), 403);
 
         $platforms = $this->platforms();
 
@@ -42,7 +42,7 @@ class BusinessSocialLinkController extends Controller
 
     public function store(Request $request, Business $business)
     {
-        Gate::authorize('update', $business);
+        abort_unless(app(BusinessAccessService::class)->can(auth()->user(), $business, 'business.social.manage'), 403);
 
         $platforms = $this->platforms();
 
@@ -64,7 +64,7 @@ class BusinessSocialLinkController extends Controller
         $submitted = $data['links'];
 
         foreach (array_keys($submitted) as $platform) {
-            if (!array_key_exists($platform, $platforms)) {
+            if (! array_key_exists($platform, $platforms)) {
                 throw ValidationException::withMessages([
                     'links' => 'Invalid social platform.',
                 ]);

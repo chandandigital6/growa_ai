@@ -6,10 +6,12 @@ use App\Models\Business;
 use App\Models\GrowyaKycDocument;
 use App\Models\GrowyaKycEvent;
 use App\Models\GrowyaKycSubmission;
+use App\Services\BusinessAccessService;
 use App\Services\GrowyaNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -19,6 +21,7 @@ class GrowyaBusinessKycController extends Controller
     {
         abort_unless(auth()->user()?->hasRole('super_admin', 'web'), 403);
     }
+
     private function ownerOnly(Business $business): void
     {
         // Business ka status (active/inactive) yahan check nahi hota: owner ko KYC karne dena chahiye
@@ -26,20 +29,24 @@ class GrowyaBusinessKycController extends Controller
         abort_unless(
             auth()->check()
                 && auth()->user()->status === 'active'
-                && ((int) $business->owner_id === (int) auth()->id() || auth()->user()->hasRole('super_admin', 'web')),
+                && ((int) $business->owner_id === (int) auth()->id() || auth()->user()->hasRole('super_admin', 'web') || app(BusinessAccessService::class)->can(auth()->user(), $business, request()->isMethodSafe() ? 'documents.view' : 'documents.manage')),
             403
         );
     }
+
     private function visible(GrowyaKycSubmission $submission): void
     {
-        abort_unless(auth()->user()?->hasRole('super_admin', 'web') || (int) $submission->business->owner_id === (int) auth()->id(), 403);
+        abort_unless(auth()->user()?->hasRole('super_admin', 'web') || (int) $submission->business->owner_id === (int) auth()->id() || app(BusinessAccessService::class)->can(auth()->user(), $submission->business, 'documents.view'), 403);
     }
+
     public function owner(Business $business)
     {
         $this->ownerOnly($business);
         $submissions = GrowyaKycSubmission::with(['documents', 'reviewer:id,name'])->where('business_id', $business->id)->latest('id')->get();
+
         return view('growya-kyc.owner', compact('business', 'submissions'));
     }
+
     public function submit(Request $request, Business $business, GrowyaNotificationService $notify)
     {
         $this->ownerOnly($business);
@@ -55,12 +62,12 @@ class GrowyaBusinessKycController extends Controller
         $allowed = ['gst_certificate', 'pan', 'business_registration', 'owner_identity', 'address_proof'];
         $uploads = $request->file('documents', []);
         foreach ($uploads as $type => $file) {
-            if (!in_array($type, $allowed, true)) {
+            if (! in_array($type, $allowed, true)) {
                 throw ValidationException::withMessages(['documents' => 'Unsupported document type.']);
             }
         }
         // Declaration ka proof: kisne, kab aur kis IP se accept kiya (extra column ki zaroorat nahi).
-        $declaration = 'Owner confirmed document authenticity | user #' . auth()->id() . ' | ' . now()->toIso8601String() . ' | IP ' . $request->ip();
+        $declaration = 'Owner confirmed document authenticity | user #'.auth()->id().' | '.now()->toIso8601String().' | IP '.$request->ip();
 
         $paths = [];
         try {
@@ -81,8 +88,10 @@ class GrowyaBusinessKycController extends Controller
                     'declaration' => $declaration,
                 ]);
                 foreach ($uploads as $type => $file) {
-                    $path = $file->store('growya-kyc/' . $business->id . '/' . $submission->id, 'local');
-                    if (!$path) throw new \RuntimeException('Private document storage failed.');
+                    $path = $file->store('growya-kyc/'.$business->id.'/'.$submission->id, 'local');
+                    if (! $path) {
+                        throw new \RuntimeException('Private document storage failed.');
+                    }
                     $paths[] = $path;
                     GrowyaKycDocument::create([
                         'submission_id' => $submission->id,
@@ -91,7 +100,7 @@ class GrowyaBusinessKycController extends Controller
                         'original_name' => mb_substr(basename($file->getClientOriginalName()), 0, 255),
                         'mime_type' => $file->getMimeType() ?: 'application/octet-stream',
                         'file_size' => $file->getSize(),
-                        'expires_on' => data_get($data, 'expires_on.' . $type),
+                        'expires_on' => data_get($data, 'expires_on.'.$type),
                     ]);
                 }
 
@@ -101,9 +110,15 @@ class GrowyaBusinessKycController extends Controller
                 $carried = 0;
                 if ($previous && $previous->status === 'approved') {
                     foreach ($previous->documents as $old) {
-                        if (isset($uploads[$old->document_type])) continue;
-                        if ($old->expires_on && now()->gt($old->expires_on)) continue;
-                        if (!Storage::disk('local')->exists($old->file_path)) continue;
+                        if (isset($uploads[$old->document_type])) {
+                            continue;
+                        }
+                        if ($old->expires_on && now()->gt($old->expires_on)) {
+                            continue;
+                        }
+                        if (! Storage::disk('local')->exists($old->file_path)) {
+                            continue;
+                        }
                         GrowyaKycDocument::create([
                             'submission_id' => $submission->id,
                             'document_type' => $old->document_type,
@@ -121,32 +136,43 @@ class GrowyaBusinessKycController extends Controller
                     'submission_id' => $submission->id,
                     'actor_id' => auth()->id(),
                     'action' => 'submitted',
-                    'reason' => $carried > 0 ? $carried . ' previously approved document(s) carried over.' : null,
+                    'reason' => $carried > 0 ? $carried.' previously approved document(s) carried over.' : null,
                 ]);
+
                 return $submission;
             }, 3);
         } catch (\Throwable $e) {
-            foreach ($paths as $path) Storage::disk('local')->delete($path);
+            foreach ($paths as $path) {
+                Storage::disk('local')->delete($path);
+            }
             throw $e;
         }
-        $notify->send($notify->superAdmins(), 'business_kyc_submitted', 'New KYC submission', $business->name . ' submitted KYC documents for review.', route('growya.kyc.admin.show', $submission, false), $business->id);
+        $notify->send($notify->superAdmins(), 'business_kyc_submitted', 'New KYC submission', $business->name.' submitted KYC documents for review.', route('growya.kyc.admin.show', $submission, false), $business->id);
+
         return back()->with('success', 'KYC submitted securely for review.');
     }
+
     public function admin(Request $request)
     {
         $this->adminOnly();
         $status = $request->validate(['status' => ['nullable', Rule::in(['pending', 'approved', 'rejected', 'all'])]])['status'] ?? 'pending';
         $query = GrowyaKycSubmission::with(['business:id,name,owner_id', 'submitter:id,name'])->latest('id');
-        if ($status !== 'all') $query->where('status', $status);
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
         $submissions = $query->paginate(20)->withQueryString();
+
         return view('growya-kyc.admin', compact('submissions', 'status'));
     }
+
     public function adminShow(GrowyaKycSubmission $submission)
     {
         $this->adminOnly();
         $submission->load(['business', 'documents', 'submitter:id,name', 'reviewer:id,name', 'events.actor:id,name']);
+
         return view('growya-kyc.review', compact('submission'));
     }
+
     public function review(Request $request, GrowyaKycSubmission $submission, GrowyaNotificationService $notify)
     {
         $this->adminOnly();
@@ -157,8 +183,12 @@ class GrowyaBusinessKycController extends Controller
         ]);
         DB::transaction(function () use ($submission, $data) {
             $locked = GrowyaKycSubmission::whereKey($submission->id)->lockForUpdate()->firstOrFail();
-            if ($locked->status !== 'pending') throw ValidationException::withMessages(['decision' => 'This submission is already reviewed.']);
-            if (!$locked->documents()->exists()) throw ValidationException::withMessages(['decision' => 'No documents uploaded.']);
+            if ($locked->status !== 'pending') {
+                throw ValidationException::withMessages(['decision' => 'This submission is already reviewed.']);
+            }
+            if (! $locked->documents()->exists()) {
+                throw ValidationException::withMessages(['decision' => 'No documents uploaded.']);
+            }
             $locked->update([
                 'status' => $data['decision'],
                 'reviewed_by' => auth()->id(),
@@ -170,19 +200,22 @@ class GrowyaBusinessKycController extends Controller
         }, 3);
 
         $business = $submission->business;
-        $message = 'KYC review for ' . $business->name . ': ' . $data['decision'] . '.';
-        if ($data['decision'] === 'rejected' && !empty($data['reason'])) {
+        $message = 'KYC review for '.$business->name.': '.$data['decision'].'.';
+        if ($data['decision'] === 'rejected' && ! empty($data['reason'])) {
             // Owner ko wajah notification mein hi dikh jaye.
-            $message .= ' Reason: ' . \Illuminate\Support\Str::limit($data['reason'], 200);
+            $message .= ' Reason: '.Str::limit($data['reason'], 200);
         }
-        $notify->send([(int) $business->owner_id], 'business_kyc_reviewed', 'Business KYC ' . ucfirst($data['decision']), $message, route('growya.kyc.owner', $business, false), $submission->business_id);
+        $notify->send([(int) $business->owner_id], 'business_kyc_reviewed', 'Business KYC '.ucfirst($data['decision']), $message, route('growya.kyc.owner', $business, false), $submission->business_id);
+
         return back()->with('success', 'Review saved.');
     }
+
     public function download(GrowyaKycSubmission $submission, GrowyaKycDocument $document)
     {
         $this->visible($submission);
         abort_unless((int) $document->submission_id === (int) $submission->id, 404);
         abort_unless(Storage::disk('local')->exists($document->file_path), 404);
+
         return Storage::disk('local')->download($document->file_path, $document->original_name);
     }
 }

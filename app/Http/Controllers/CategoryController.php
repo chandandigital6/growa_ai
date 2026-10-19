@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Business;
 use App\Models\Category;
+use App\Models\Product;
+use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -31,15 +34,18 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $this->authorizeAdmin();
+        if (isset($category)) {
+            abort_unless($category->business_id === null, 404);
+        }
 
-        $query = Category::query()->with('parent');
+        $query = Category::query()->whereNull('business_id')->with('parent');
 
         if ($request->filled('search')) {
             $search = trim($request->search);
 
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('slug', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%");
             });
         }
 
@@ -62,10 +68,13 @@ class CategoryController extends Controller
     public function create()
     {
         $this->authorizeAdmin();
+        if (isset($category)) {
+            abort_unless($category->business_id === null, 404);
+        }
 
         return view('categories.form', [
-            'category' => new Category(),
-            'parents' => Category::query()
+            'category' => new Category,
+            'parents' => Category::query()->whereNull('business_id')
                 ->whereNull('parent_id')
                 ->orderBy('name')
                 ->get(),
@@ -76,6 +85,9 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $this->authorizeAdmin();
+        if (isset($category)) {
+            abort_unless($category->business_id === null, 404);
+        }
 
         $data = $this->validateCategory($request);
 
@@ -93,7 +105,7 @@ class CategoryController extends Controller
             if ($image) {
                 $path = $image->store('categories', 'public');
 
-                if (!$path) {
+                if (! $path) {
                     throw new \RuntimeException('Image upload failed.');
                 }
 
@@ -116,10 +128,13 @@ class CategoryController extends Controller
     public function edit(Category $category)
     {
         $this->authorizeAdmin();
+        if (isset($category)) {
+            abort_unless($category->business_id === null, 404);
+        }
 
         return view('categories.form', [
             'category' => $category,
-            'parents' => Category::query()
+            'parents' => Category::query()->whereNull('business_id')
                 ->whereNull('parent_id')
                 ->where('id', '!=', $category->id)
                 ->orderBy('name')
@@ -131,6 +146,9 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $this->authorizeAdmin();
+        if (isset($category)) {
+            abort_unless($category->business_id === null, 404);
+        }
 
         $data = $this->validateCategory($request, $category);
 
@@ -143,7 +161,7 @@ class CategoryController extends Controller
         }
 
         if ($category->children()->exists()
-            && !empty($data['parent_id'])) {
+            && ! empty($data['parent_id'])) {
             throw ValidationException::withMessages([
                 'parent_id' => 'A parent category cannot become a subcategory while it has children.',
             ]);
@@ -168,7 +186,7 @@ class CategoryController extends Controller
             if ($image) {
                 $newPath = $image->store('categories', 'public');
 
-                if (!$newPath) {
+                if (! $newPath) {
                     throw new \RuntimeException('Image upload failed.');
                 }
 
@@ -195,6 +213,9 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $this->authorizeAdmin();
+        if (isset($category)) {
+            abort_unless($category->business_id === null, 404);
+        }
 
         if ($this->isUsed($category)) {
             return back()->withErrors([
@@ -215,9 +236,9 @@ class CategoryController extends Controller
     private function isUsed(Category $category): bool
     {
         return $category->children()->exists()
-            || \App\Models\Business::where('category_id', $category->id)->exists()
-            || \App\Models\Product::where('category_id', $category->id)->exists()
-            || \App\Models\Service::where('category_id', $category->id)->exists();
+            || Business::where('category_id', $category->id)->exists()
+            || Product::where('category_id', $category->id)->exists()
+            || Service::where('category_id', $category->id)->exists();
     }
 
     private function validateCategory(
@@ -230,7 +251,7 @@ class CategoryController extends Controller
                 'required',
                 Rule::in(array_keys($this->types())),
             ],
-            'parent_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'parent_id' => ['nullable', 'integer', Rule::exists('categories', 'id')->whereNull('business_id')],
             'icon' => ['nullable', 'string', 'max:255'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['required', 'boolean'],
@@ -238,7 +259,7 @@ class CategoryController extends Controller
             'sort_order' => ['required', 'integer', 'min:0', 'max:999999'],
         ]);
 
-        if (!empty($data['parent_id'])) {
+        if (! empty($data['parent_id'])) {
             $parent = Category::findOrFail($data['parent_id']);
 
             if (
@@ -265,13 +286,13 @@ class CategoryController extends Controller
         $count = 2;
 
         while (
-            Category::query()
+            Category::query()->whereNull('business_id')
                 ->where('category_type', $type)
                 ->where('slug', $slug)
-                ->when($exceptId, fn($q) => $q->where('id', '!=', $exceptId))
+                ->when($exceptId, fn ($q) => $q->where('id', '!=', $exceptId))
                 ->exists()
         ) {
-            $slug = $base . '-' . $count++;
+            $slug = $base.'-'.$count++;
         }
 
         return $slug;

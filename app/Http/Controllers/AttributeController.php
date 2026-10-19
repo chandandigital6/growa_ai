@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class AttributeController extends Controller
 {
@@ -23,8 +22,11 @@ class AttributeController extends Controller
     public function index(Request $request)
     {
         $this->authorizeAdmin();
+        if (isset($attribute)) {
+            abort_unless($attribute->business_id === null, 404);
+        }
 
-        $query = Attribute::query()
+        $query = Attribute::query()->whereNull('business_id')
             ->with([
                 'values' => fn ($q) => $q
                     ->orderBy('sort_order')
@@ -37,7 +39,7 @@ class AttributeController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('slug', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%");
             });
         }
 
@@ -55,6 +57,9 @@ class AttributeController extends Controller
     public function store(Request $request)
     {
         $this->authorizeAdmin();
+        if (isset($attribute)) {
+            abort_unless($attribute->business_id === null, 404);
+        }
 
         $data = $request->validate([
             'name' => [
@@ -85,6 +90,9 @@ class AttributeController extends Controller
         Attribute $attribute
     ) {
         $this->authorizeAdmin();
+        if (isset($attribute)) {
+            abort_unless($attribute->business_id === null, 404);
+        }
 
         $data = $request->validate([
             'name' => [
@@ -117,11 +125,13 @@ class AttributeController extends Controller
     public function destroy(Attribute $attribute)
     {
         $this->authorizeAdmin();
+        if (isset($attribute)) {
+            abort_unless($attribute->business_id === null, 404);
+        }
 
         if ($attribute->values()->exists()) {
             return back()->withErrors([
-                'attribute' =>
-                    'Delete all attribute values first.',
+                'attribute' => 'Delete all attribute values first.',
             ]);
         }
 
@@ -138,6 +148,9 @@ class AttributeController extends Controller
         Attribute $attribute
     ) {
         $this->authorizeAdmin();
+        if (isset($attribute)) {
+            abort_unless($attribute->business_id === null, 404);
+        }
 
         $data = $request->validate([
             'value' => [
@@ -172,6 +185,9 @@ class AttributeController extends Controller
         AttributeValue $value
     ) {
         $this->authorizeAdmin();
+        if (isset($attribute)) {
+            abort_unless($attribute->business_id === null, 404);
+        }
         $this->checkValue($attribute, $value);
 
         $data = $request->validate([
@@ -207,12 +223,14 @@ class AttributeController extends Controller
         AttributeValue $value
     ) {
         $this->authorizeAdmin();
+        if (isset($attribute)) {
+            abort_unless($attribute->business_id === null, 404);
+        }
         $this->checkValue($attribute, $value);
 
-        if ($value->products()->exists()) {
+        if ($value->products()->exists() || DB::table('product_variant_attribute_values')->where('attribute_value_id', $value->id)->exists()) {
             return back()->withErrors([
-                'value' =>
-                    'This value is assigned to products. Remove it from those products first.',
+                'value' => 'This value is assigned to products. Remove it from those products first.',
             ]);
         }
 
@@ -244,7 +262,7 @@ class AttributeController extends Controller
         $number = 2;
 
         while (
-            Attribute::query()
+            Attribute::query()->whereNull('business_id')
                 ->where('slug', $slug)
                 ->when(
                     $ignoreId,
@@ -256,7 +274,7 @@ class AttributeController extends Controller
                 )
                 ->exists()
         ) {
-            $slug = $base . '-' . $number++;
+            $slug = $base.'-'.$number++;
         }
 
         return $slug;

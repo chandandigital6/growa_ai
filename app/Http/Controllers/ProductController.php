@@ -7,14 +7,15 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Services\BusinessAccessService;
+use App\Services\GrowyaPlanLimitService;
+use App\Services\ProductQrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use App\Services\ProductQrCodeService;
-use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -37,9 +38,9 @@ class ProductController extends Controller
         );
     }
 
-    private function categories()
+    private function categories(Business $business)
     {
-        return Category::query()
+        return Category::query()->where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))
             ->where('category_type', 'product')
             ->where('is_active', true)
             ->orderBy('name')
@@ -95,8 +96,8 @@ class ProductController extends Controller
 
         return view('products.form', [
             'business' => $business,
-            'product' => new Product(),
-            'categories' => $this->categories(),
+            'product' => new Product,
+            'categories' => $this->categories($business),
         ]);
     }
 
@@ -119,7 +120,7 @@ class ProductController extends Controller
                     'public'
                 );
 
-                if (!$imagePath) {
+                if (! $imagePath) {
                     throw new \RuntimeException('Image upload failed.');
                 }
 
@@ -130,19 +131,21 @@ class ProductController extends Controller
                 $business,
                 $data
             ) {
-                \App\Models\Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
-                app(\App\Services\GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_products');
+                Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
+                app(GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_products');
                 $data['slug'] = $this->generateSlug(
                     $business,
                     $data['name']
                 );
 
-
                 return $business->products()->create($data);
             });
 
-            app(ProductQrCodeService::class)->generate($product);
-
+            try {
+                app(ProductQrCodeService::class)->generate($product);
+            } catch (\Throwable $qrError) {
+                Log::warning('Product saved; QR can be regenerated.', ['product_id' => $product->id, 'error' => $qrError->getMessage()]);
+            }
 
         } catch (\Throwable $e) {
             if ($imagePath) {
@@ -185,7 +188,7 @@ class ProductController extends Controller
         return view('products.form', [
             'business' => $business,
             'product' => $product,
-            'categories' => $this->categories(),
+            'categories' => $this->categories($business),
         ]);
     }
 
@@ -230,7 +233,7 @@ class ProductController extends Controller
                     'public'
                 );
 
-                if (!$newImage) {
+                if (! $newImage) {
                     throw new \RuntimeException('Image upload failed.');
                 }
 
@@ -251,7 +254,7 @@ class ProductController extends Controller
                 ->where('image', $oldImage)
                 ->exists();
 
-            if (!$usedInGallery) {
+            if (! $usedInGallery) {
                 Storage::disk('public')->delete($oldImage);
             }
         }
@@ -311,7 +314,7 @@ class ProductController extends Controller
 
             'category_id' => [
                 'nullable',
-                Rule::exists('categories', 'id')
+                Rule::exists('categories', 'id')->where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))
                     ->where('category_type', 'product')
                     ->where('is_active', true),
             ],
@@ -377,8 +380,7 @@ class ProductController extends Controller
                 && (int) $data['stock_quantity'] > 0
             ) {
                 throw ValidationException::withMessages([
-                    'stock_quantity' =>
-                    'Out of stock products must have zero quantity.',
+                    'stock_quantity' => 'Out of stock products must have zero quantity.',
                 ]);
             }
 
@@ -387,8 +389,7 @@ class ProductController extends Controller
                 && (int) $data['stock_quantity'] === 0
             ) {
                 throw ValidationException::withMessages([
-                    'stock_quantity' =>
-                    'In-stock products must have quantity greater than zero.',
+                    'stock_quantity' => 'In-stock products must have quantity greater than zero.',
                 ]);
             }
         }
@@ -421,8 +422,7 @@ class ProductController extends Controller
 
             if ($name === '' || $value === '') {
                 throw ValidationException::withMessages([
-                    'specifications' =>
-                    'Every specification must have both name and value.',
+                    'specifications' => 'Every specification must have both name and value.',
                 ]);
             }
 
@@ -448,15 +448,15 @@ class ProductController extends Controller
 
         while (
             Product::withTrashed()
-            ->where('business_id', $business->id)
-            ->where('slug', $slug)
-            ->when(
-                $exceptId,
-                fn($q) => $q->where('id', '!=', $exceptId)
-            )
-            ->exists()
+                ->where('business_id', $business->id)
+                ->where('slug', $slug)
+                ->when(
+                    $exceptId,
+                    fn ($q) => $q->where('id', '!=', $exceptId)
+                )
+                ->exists()
         ) {
-            $slug = $base . '-' . $number++;
+            $slug = $base.'-'.$number++;
         }
 
         return $slug;

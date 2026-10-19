@@ -1,9 +1,9 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Appointment;
 use App\Models\Business;
-use App\Models\BusinessEnquiry;
 use App\Models\BusinessFollower;
 use App\Models\Order;
 use App\Models\Review;
@@ -40,9 +40,9 @@ class GrowyaDashboardController extends Controller
             ->where('verification_status', 'approved')
             ->where(function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
-                  ->orWhereHas('businessUsers', function ($membership) use ($user) {
-                      $membership->where('user_id', $user->id)->where('is_active', true);
-                  });
+                    ->orWhereHas('businessUsers', function ($membership) use ($user) {
+                        $membership->where('user_id', $user->id)->where('is_active', true);
+                    });
             })
             ->with('city:id,name')
             ->orderBy('name')
@@ -55,7 +55,9 @@ class GrowyaDashboardController extends Controller
         $business = $selectedId
             ? $businesses->firstWhere('id', (int) $selectedId)
             : $businesses->first();
-        if ($selectedId && ! $business) abort(404);
+        if ($selectedId && ! $business) {
+            abort(404);
+        }
 
         // User who owns only a pending business is still a customer until approval.
         if (! $business) {
@@ -72,12 +74,12 @@ class GrowyaDashboardController extends Controller
         $canProducts = $can('products.view');
         $canServices = $can('services.view');
         // Existing order, payment, return and delivery endpoints use products.view.
-        $canOrders = $canProducts;
-        $canEnquiries = $can('services.view');
+        $canOrders = $can('orders.view');
+        $canEnquiries = $can('service_enquiries.view');
         $isBusinessOwner = (int) $business->owner_id === (int) $user->id;
-        $canStaff = $this->access->canManageStaff($user, $business);
+        $canStaff = $can('staff.view');
         $canOverview = $can('business.view');
-        $workspaceRole = $isBusinessOwner ? 'Business Owner' : 'Business Admin';
+        $workspaceRole = $isBusinessOwner ? 'Business Owner' : ucfirst($this->access->membership($user, $business)?->role ?? 'Staff');
 
         $stats = [
             'views' => (int) $business->views_count,
@@ -86,13 +88,13 @@ class GrowyaDashboardController extends Controller
             'services' => $canServices ? $business->services()->count() : null,
             'orders' => $canOrders ? $business->orders()->count() : null,
             'pendingOrders' => $canOrders ? $business->orders()->where('status', 'pending')->count() : null,
-            'sales' => $canOrders ? $business->orders()->where('payment_status', 'paid')->where('status', '!=', 'cancelled')->sum('total_amount') : null,
+            'sales' => $can('analytics.view') ? $business->orders()->where('payment_status', 'paid')->where('status', '!=', 'cancelled')->sum('total_amount') : null,
             'enquiries' => $canEnquiries ? ServiceEnquiry::where('business_id', $business->id)->count() : null,
-            'appointments' => $canServices ? Appointment::where('business_id', $business->id)->whereIn('status', ['pending','confirmed'])->whereDate('appointment_date', '>=', now()->toDateString())->count() : null,
+            'appointments' => $can('appointments.view') ? Appointment::where('business_id', $business->id)->whereIn('status', ['pending', 'confirmed'])->whereDate('appointment_date', '>=', now()->toDateString())->count() : null,
         ];
         $recentOrders = $canOrders ? $business->orders()->latest('id')->limit(5)->get() : collect();
         $recentEnquiries = $canEnquiries ? ServiceEnquiry::where('business_id', $business->id)->with('service:id,name')->latest('id')->limit(5)->get() : collect();
-        $upcomingAppointments = $canServices ? Appointment::where('business_id', $business->id)
+        $upcomingAppointments = $can('appointments.view') ? Appointment::where('business_id', $business->id)
             ->whereIn('status', ['pending', 'confirmed'])
             ->whereDate('appointment_date', '>=', now()->toDateString())
             ->with('service:id,name')->orderBy('appointment_date')->orderBy('appointment_time')->limit(5)->get() : collect();
@@ -105,9 +107,12 @@ class GrowyaDashboardController extends Controller
 
     private function canOpenBusiness(User $user, Business $business): bool
     {
-        foreach (['business.view', 'products.view', 'services.view'] as $permission) {
-            if ($this->access->can($user, $business, $permission)) return true;
+        foreach (config('business_permissions.permissions') as $permission) {
+            if ($this->access->can($user, $business, $permission)) {
+                return true;
+            }
         }
+
         return false;
     }
 }

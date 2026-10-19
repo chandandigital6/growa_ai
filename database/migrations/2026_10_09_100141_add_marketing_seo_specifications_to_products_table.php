@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -29,12 +28,12 @@ return new class extends Migration
         Schema::table('products', function (Blueprint $table) {
             $table->dropIndex([
                 'business_id',
-                'is_featured'
+                'is_featured',
             ]);
 
             $table->dropIndex([
                 'business_id',
-                'is_trending'
+                'is_trending',
             ]);
 
             $table->dropColumn([

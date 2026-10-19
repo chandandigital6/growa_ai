@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\Business;
 use App\Models\ServiceEnquiry;
 use App\Models\ServiceEnquiryFollowUp;
@@ -43,11 +44,11 @@ class ServiceEnquiryFollowUpController extends Controller
 
     public function index(Request $request, Business $business)
     {
-        $this->authorizeBusiness($business, 'services.view');
+        $this->authorizeBusiness($business, 'service_enquiries.view');
 
         $filter = $request->input('filter', 'pending');
 
-        if (!in_array(
+        if (! in_array(
             $filter,
             ['pending', 'overdue', 'completed', 'all'],
             true
@@ -140,7 +141,7 @@ class ServiceEnquiryFollowUpController extends Controller
 
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'service_enquiries.manage'
         );
 
         $data = $request->validate([
@@ -158,7 +159,7 @@ class ServiceEnquiryFollowUpController extends Controller
 
         $followUpAt = null;
 
-        if (!empty($data['follow_up_at'])) {
+        if (! empty($data['follow_up_at'])) {
             $followUpAt = Carbon::createFromFormat(
                 'Y-m-d\TH:i',
                 $data['follow_up_at'],
@@ -167,8 +168,7 @@ class ServiceEnquiryFollowUpController extends Controller
 
             if ($followUpAt->lessThanOrEqualTo(now())) {
                 throw ValidationException::withMessages([
-                    'follow_up_at' =>
-                        'Follow-up date and time must be in the future.',
+                    'follow_up_at' => 'Follow-up date and time must be in the future.',
                 ]);
             }
         }
@@ -203,7 +203,7 @@ class ServiceEnquiryFollowUpController extends Controller
 
         $this->authorizeBusiness(
             $business,
-            'services.update'
+            'service_enquiries.manage'
         );
 
         abort_unless(

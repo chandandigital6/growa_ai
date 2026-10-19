@@ -70,15 +70,17 @@
                     icon="heart" tone="rose" />
             @endif
         </section>
-        @if ($canOrders || $canServices)
+        @if ($stats['sales'] !== null || $stats['enquiries'] !== null || $stats['appointments'] !== null)
             <section class="g-stats g-stats-three">
-                @if ($canOrders)
+                @if ($stats['sales'] !== null)
                     <x-growya.stat label="Paid order value" :value="'₹' . number_format((float) $stats['sales'], 2)"
                         note="Paid, non-cancelled orders · not a payout balance" icon="wallet" />
                 @endif
-                @if ($canServices)
+                @if ($stats['enquiries'] !== null)
                     <x-growya.stat label="Service enquiries" :value="number_format($stats['enquiries'])" note="Enquiries for this business"
-                        icon="chat" tone="blue" :href="route('businesses.service-enquiries.index', $business)" /><x-growya.stat label="Upcoming appointments"
+                        icon="chat" tone="blue" :href="route('businesses.service-enquiries.index', $business)" />
+                @endif
+                @if ($stats['appointments'] !== null)<x-growya.stat label="Upcoming appointments"
                         :value="number_format($stats['appointments'])" note="Pending or confirmed · today onwards" icon="calendar" tone="amber"
                         :href="route('businesses.appointments.index', $business)" />
                 @endif
@@ -135,7 +137,7 @@
                     </div>
                 </div>
                 <div class="g-quick-grid">
-                    @foreach ([['Products', 'businesses.products.index', 'products.view', 'box'], ['Services', 'businesses.services.index', 'services.view', 'sparkles'], ['Orders', 'businesses.orders.index', 'products.view', 'bag'], ['Payments', 'businesses.payments.index', 'products.view', 'wallet'], ['Offers', 'businesses.offers.index', 'services.view', 'tag'], ['Gallery', 'businesses.gallery.index', 'services.view', 'photo'], ['Appointments', 'businesses.appointments.index', 'services.view', 'calendar'], ['Product leads', 'businesses.product-enquiries.index', 'products.view', 'chat'], ['Service leads', 'businesses.service-enquiries.index', 'services.view', 'chat']] as [$label, $routeName, $permission, $icon])
+                    @foreach ([['Products', 'businesses.products.index', 'products.view', 'box'], ['Services', 'businesses.services.index', 'services.view', 'sparkles'], ['Orders', 'businesses.orders.index', 'orders.view', 'bag'], ['Payments', 'businesses.payments.index', 'payments.view', 'wallet'], ['Offers', 'businesses.offers.index', 'offers.view', 'tag'], ['Gallery', 'businesses.gallery.index', 'gallery.view', 'photo'], ['Appointments', 'businesses.appointments.index', 'appointments.view', 'calendar'], ['Product leads', 'businesses.product-enquiries.index', 'product_enquiries.view', 'chat'], ['Service leads', 'businesses.service-enquiries.index', 'service_enquiries.view', 'chat']] as [$label, $routeName, $permission, $icon])
                         @if (app(\App\Services\BusinessAccessService::class)->can(auth()->user(), $business, $permission))
                             <a class="g-quick" href="{{ route($routeName, $business) }}"><span
                                     class="g-icon-box"><x-growya.icon

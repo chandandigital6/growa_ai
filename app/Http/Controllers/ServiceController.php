@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Category;
 use App\Models\Service;
 use App\Services\BusinessAccessService;
+use App\Services\GrowyaPlanLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -47,21 +48,19 @@ class ServiceController extends Controller
         $this->authorizeBusiness($business, $permission);
     }
 
-
-private function categories()
-{
-    return Category::query()
-        ->where('category_type', 'service')
-        ->where('is_active', 1)
-        ->orderBy('sort_order')
-        ->orderBy('name')
-        ->get([
-            'id',
-            'name',
-            'parent_id',
-        ]);
-}
-
+    private function categories(Business $business)
+    {
+        return Category::query()->where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))
+            ->where('category_type', 'service')
+            ->where('is_active', 1)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get([
+                'id',
+                'name',
+                'parent_id',
+            ]);
+    }
 
     public function index(Request $request, Business $business)
     {
@@ -76,8 +75,8 @@ private function categories()
             $search = trim((string) $request->input('search'));
 
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%');
+                $q->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%');
             });
         }
 
@@ -105,8 +104,8 @@ private function categories()
 
         return view('services.form', [
             'business' => $business,
-            'service' => new Service(),
-            'categories' => $this->categories(),
+            'service' => new Service,
+            'categories' => $this->categories($business),
         ]);
     }
 
@@ -123,7 +122,7 @@ private function categories()
 
             'category_id' => [
                 'nullable',
-                Rule::exists('categories', 'id')
+                Rule::exists('categories', 'id')->where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))
                     ->where('category_type', 'service')
                     ->where('is_active', true),
             ],
@@ -183,7 +182,7 @@ private function categories()
             ['fixed', 'starting_from'],
             true
         )) {
-            if (!isset($data['price'])) {
+            if (! isset($data['price'])) {
                 throw ValidationException::withMessages([
                     'price' => 'Price is required for this price type.',
                 ]);
@@ -194,8 +193,7 @@ private function categories()
                 && (float) $data['offer_price'] > (float) $data['price']
             ) {
                 throw ValidationException::withMessages([
-                    'offer_price' =>
-                        'Offer price cannot exceed regular price.',
+                    'offer_price' => 'Offer price cannot exceed regular price.',
                 ]);
             }
         } else {
@@ -225,7 +223,7 @@ private function categories()
                 )
                 ->exists()
         ) {
-            $slug = $base . '-' . $counter;
+            $slug = $base.'-'.$counter;
             $counter++;
         }
 
@@ -263,8 +261,9 @@ private function categories()
                 $business,
                 $data
             ) {
-                \App\Models\Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
-                app(\App\Services\GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_services');
+                Business::whereKey($business->id)->lockForUpdate()->firstOrFail();
+                app(GrowyaPlanLimitService::class)->assertCanAdd($business, 'max_services');
+
                 return $business->services()->create($data);
             });
         } catch (\Throwable $e) {
@@ -313,7 +312,7 @@ private function categories()
         return view('services.form', [
             'business' => $business,
             'service' => $service,
-            'categories' => $this->categories(),
+            'categories' => $this->categories($business),
         ]);
     }
 
@@ -363,7 +362,7 @@ private function categories()
             $newImage
             && $oldImage
             && $oldImage !== $newImage
-            && !$service->images()->where('image', $oldImage)->exists()
+            && ! $service->images()->where('image', $oldImage)->exists()
         ) {
             Storage::disk('public')->delete($oldImage);
         }

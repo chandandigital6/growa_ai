@@ -6,6 +6,7 @@ use App\Models\Business;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\BusinessAccessService;
+use App\Services\GrowyaPlanLimitService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -48,7 +49,7 @@ class ProductBulkController extends Controller
     {
         $this->authorizeAccess($business, 'products.view');
 
-        $categories = Category::query()
+        $categories = Category::query()->where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))
             ->where('category_type', 'product')
             ->where('is_active', true)
             ->orderBy('name')
@@ -92,9 +93,9 @@ class ProductBulkController extends Controller
         $this->authorizeAccess($business, 'products.view');
 
         $filename = 'growya-products-business-'
-            . $business->id . '-'
-            . now()->format('Ymd-His')
-            . '.csv';
+            .$business->id.'-'
+            .now()->format('Ymd-His')
+            .'.csv';
 
         return response()->streamDownload(
             function () use ($business) {
@@ -146,7 +147,7 @@ class ProductBulkController extends Controller
         $value = (string) ($value ?? '');
 
         if (preg_match('/^[\s]*[=+\-@]/u', $value)) {
-            return "'" . $value;
+            return "'".$value;
         }
 
         return $value;
@@ -170,7 +171,7 @@ class ProductBulkController extends Controller
             'rb'
         );
 
-        if (!$handle) {
+        if (! $handle) {
             throw ValidationException::withMessages([
                 'file' => 'Unable to read the CSV file.',
             ]);
@@ -179,7 +180,7 @@ class ProductBulkController extends Controller
         try {
             $header = fgetcsv($handle, 0, ',', '"', '');
 
-            if (!$header) {
+            if (! $header) {
                 throw ValidationException::withMessages([
                     'file' => 'CSV file is empty.',
                 ]);
@@ -199,12 +200,11 @@ class ProductBulkController extends Controller
 
             if ($header !== self::HEADERS) {
                 throw ValidationException::withMessages([
-                    'file' =>
-                        'Invalid CSV headers. Download and use the sample template.',
+                    'file' => 'Invalid CSV headers. Download and use the sample template.',
                 ]);
             }
 
-            $categories = Category::query()
+            $categories = Category::query()->where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))
                 ->where('category_type', 'product')
                 ->where('is_active', true)
                 ->pluck('id')
@@ -251,6 +251,7 @@ class ProductBulkController extends Controller
                         $line,
                         'Column count does not match template.',
                     ];
+
                     continue;
                 }
 
@@ -294,8 +295,8 @@ class ProductBulkController extends Controller
                 if (
                     $categoryId !== ''
                     && (
-                        !ctype_digit($categoryId)
-                        || !in_array((int) $categoryId, $categories, true)
+                        ! ctype_digit($categoryId)
+                        || ! in_array((int) $categoryId, $categories, true)
                     )
                 ) {
                     $rowErrors[] = 'Invalid or inactive product category.';
@@ -305,7 +306,7 @@ class ProductBulkController extends Controller
                     if (
                         ($field === 'price' || $row[$field] !== '')
                         && (
-                            !preg_match('/^\d+(\.\d{1,2})?$/', $row[$field])
+                            ! preg_match('/^\d+(\.\d{1,2})?$/', $row[$field])
                             || (float) $row[$field] > 999999999999.99
                         )
                     ) {
@@ -324,13 +325,13 @@ class ProductBulkController extends Controller
                 }
 
                 if (
-                    !ctype_digit($row['stock_quantity'])
+                    ! ctype_digit($row['stock_quantity'])
                     || (float) $row['stock_quantity'] > 2147483647
                 ) {
                     $rowErrors[] = 'Invalid stock quantity.';
                 }
 
-                if (!in_array(
+                if (! in_array(
                     $row['status'],
                     ['active', 'inactive'],
                     true
@@ -347,6 +348,7 @@ class ProductBulkController extends Controller
                         $line,
                         implode(' ', $rowErrors),
                     ];
+
                     continue;
                 }
 
@@ -374,18 +376,21 @@ class ProductBulkController extends Controller
             fclose($handle);
         }
 
+        if ($errors && $request->is('api/*')) {
+            return response()->json(['message' => 'Invalid CSV rows. No products imported.', 'errors' => ['file' => ['Correct invalid CSV rows.']], 'import_errors' => $errors], 422);
+        }
         if ($errors) {
             $this->saveErrorReport($request, $business, $errors);
 
             return back()
                 ->withErrors([
                     'file' => count($errors)
-                        . ' invalid CSV rows. No products imported.',
+                        .' invalid CSV rows. No products imported.',
                 ])
                 ->with('import_errors', array_slice($errors, 0, 20));
         }
 
-        if (!$rows) {
+        if (! $rows) {
             return back()->withErrors([
                 'file' => 'No valid product rows found.',
             ]);
@@ -393,14 +398,14 @@ class ProductBulkController extends Controller
 
         DB::transaction(function () use ($rows, $business) {
             $locked = Business::query()->whereKey($business->id)->lockForUpdate()->firstOrFail();
-            app(\App\Services\GrowyaPlanLimitService::class)->assertCanAddMany($locked, 'max_products', count($rows));
+            app(GrowyaPlanLimitService::class)->assertCanAddMany($locked, 'max_products', count($rows));
             foreach ($rows as $row) {
                 // Generate a unique business-scoped slug.
                 do {
                     $slug = Str::slug($row['name'])
                         ?: 'product';
 
-                    $slug .= '-' . strtolower(
+                    $slug .= '-'.strtolower(
                         Str::random(12)
                     );
                 } while (
@@ -420,7 +425,7 @@ class ProductBulkController extends Controller
             ->route('businesses.products.bulk.index', $business)
             ->with(
                 'success',
-                count($rows) . ' products imported successfully.'
+                count($rows).' products imported successfully.'
             );
     }
 
@@ -452,7 +457,7 @@ class ProductBulkController extends Controller
         rewind($stream);
 
         $path = 'product-import-errors/'
-            . Str::uuid() . '.csv';
+            .Str::uuid().'.csv';
 
         Storage::disk('local')->put(
             $path,

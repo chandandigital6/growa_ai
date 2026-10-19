@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -43,12 +42,12 @@ return new class extends Migration
 
             $table->index([
                 'business_id',
-                'created_at'
+                'created_at',
             ]);
 
             $table->index([
                 'product_id',
-                'product_variant_id'
+                'product_variant_id',
             ]);
         });
     }

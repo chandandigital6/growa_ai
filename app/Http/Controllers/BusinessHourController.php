@@ -4,10 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\BusinessHour;
+use App\Services\BusinessAccessService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class BusinessHourController extends Controller
@@ -17,7 +16,7 @@ class BusinessHourController extends Controller
      */
     public function index(Business $business)
     {
-        Gate::authorize('view', $business);
+        abort_unless(app(BusinessAccessService::class)->can(auth()->user(), $business, 'business.hours.manage'), 403);
 
         $hours = $business->hours()
             ->get()
@@ -45,7 +44,7 @@ class BusinessHourController extends Controller
      */
     public function store(Request $request, Business $business)
     {
-        Gate::authorize('update', $business);
+        abort_unless(app(BusinessAccessService::class)->can(auth()->user(), $business, 'business.hours.manage'), 403);
 
         $validated = $request->validate([
             'hours' => ['required', 'array', 'size:7'],
@@ -96,15 +95,13 @@ class BusinessHourController extends Controller
                 || empty($data['close_time'])
             ) {
                 throw ValidationException::withMessages([
-                    "hours.$day.open_time" =>
-                        'Opening and closing times are required.',
+                    "hours.$day.open_time" => 'Opening and closing times are required.',
                 ]);
             }
 
             if ($data['close_time'] <= $data['open_time']) {
                 throw ValidationException::withMessages([
-                    "hours.$day.close_time" =>
-                        'Closing time must be after opening time.',
+                    "hours.$day.close_time" => 'Closing time must be after opening time.',
                 ]);
             }
         }

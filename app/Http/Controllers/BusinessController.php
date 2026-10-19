@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Business;
 use App\Models\Category;
+use App\Models\City;
 use App\Models\Country;
 use App\Models\State;
-use App\Models\City;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\File;
+use Illuminate\Validation\ValidationException;
 
 class BusinessController extends Controller
 {
@@ -29,7 +30,7 @@ class BusinessController extends Controller
         ]);
 
         // Global business.view must NOT expose other businesses to owners.
-        if (!$user->hasRole('super_admin', 'web')) {
+        if (! $user->hasRole('super_admin', 'web')) {
             $query->where(function ($q) use ($user) {
                 $q->where('owner_id', $user->id)
                     ->orWhereHas('businessUsers', function ($members) use ($user) {
@@ -56,9 +57,9 @@ class BusinessController extends Controller
     public function create(Request $request)
     {
         Gate::authorize('create', Business::class);
+
         return view('businesses.create', $this->formOptions());
     }
-
 
     public function store(Request $request)
     {
@@ -94,7 +95,7 @@ class BusinessController extends Controller
                 &$uploadedPaths
             ) {
                 $slug = (Str::slug($data['name']) ?: 'business')
-                    . '-' . strtolower((string) Str::ulid());
+                    .'-'.strtolower((string) Str::ulid());
 
                 $business = Business::create([
                     ...$data,
@@ -111,7 +112,7 @@ class BusinessController extends Controller
                             'public'
                         );
 
-                        if (!$path) {
+                        if (! $path) {
                             throw new \RuntimeException(
                                 "Failed to upload {$field}."
                             );
@@ -143,7 +144,6 @@ class BusinessController extends Controller
             ->with('success', 'Your business application was submitted for Super Admin approval.');
     }
 
-
     public function show(Business $business)
     {
         Gate::authorize('view', $business);
@@ -154,17 +154,18 @@ class BusinessController extends Controller
             'state:id,name',
             'city:id,name',
             'hours',
-            'socialLinks'
+            'socialLinks',
         ]);
+
         return view('businesses.show', compact('business'));
     }
 
     public function edit(Business $business)
     {
         Gate::authorize('update', $business);
+
         return view('businesses.edit', ['business' => $business, ...$this->formOptions()]);
     }
-
 
     public function update(Request $request, Business $business)
     {
@@ -185,7 +186,7 @@ class BusinessController extends Controller
                         'public'
                     );
 
-                    if (!$path) {
+                    if (! $path) {
                         throw new \RuntimeException(
                             "Failed to upload {$field}."
                         );
@@ -223,9 +224,9 @@ class BusinessController extends Controller
     {
         Gate::authorize('delete', $business);
         $business->delete(); // Soft delete; member records remain for recovery
+
         return redirect()->route('businesses.index')->with('success', 'Business moved to trash.');
     }
-
 
     private function validated(Request $request): array
     {
@@ -244,13 +245,13 @@ class BusinessController extends Controller
             'description' => [
                 'nullable',
                 'string',
-                'max:10000'
+                'max:10000',
             ],
 
             'category_id' => [
                 'nullable',
                 Rule::exists('categories', 'id')
-                    ->where('category_type', 'business')
+                    ->whereNull('business_id')->where('category_type', 'business')
                     ->where('is_active', true),
             ],
 
@@ -282,13 +283,13 @@ class BusinessController extends Controller
             'gst_number' => [
                 'nullable',
                 'string',
-                'max:30'
+                'max:30',
             ],
 
             'upi_id' => [
                 'nullable',
                 'string',
-                'max:255'
+                'max:255',
             ],
 
             'logo' => [
@@ -315,11 +316,9 @@ class BusinessController extends Controller
             ->where('is_active', true)
             ->exists();
 
-        if (!$validCity) {
-            throw \Illuminate\Validation\ValidationException
-                ::withMessages([
-                    'city_id' =>
-                    'Please select a city from the selected state.',
+        if (! $validCity) {
+            throw ValidationException::withMessages([
+                    'city_id' => 'Please select a city from the selected state.',
                 ]);
         }
 
@@ -329,11 +328,10 @@ class BusinessController extends Controller
         return $data;
     }
 
-
     private function formOptions(): array
     {
         return [
-            'categories' => Category::where('category_type', 'business')->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'categories' => Category::whereNull('business_id')->whereNull('business_id')->where('category_type', 'business')->where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'countries' => Country::where('is_active', true)->orderBy('name')->get(['id', 'name']),
             'states' => State::where('is_active', true)->orderBy('name')->get(['id', 'name', 'country_id']),
             'cities' => City::where('is_active', true)->orderBy('name')->get(['id', 'name', 'state_id']),

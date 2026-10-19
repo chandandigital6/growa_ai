@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Business;
 use App\Models\GrowyaSubscriptionBillingDocument;
 use App\Models\SubscriptionPayment;
+use App\Services\BusinessAccessService;
 use App\Services\GrowyaSubscriptionBillingService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -18,13 +20,7 @@ class GrowyaSubscriptionBillingController extends Controller
 
     private function owner(Business $business): void
     {
-        abort_unless(
-            auth()->check() && (
-                auth()->user()->hasRole('super_admin', 'web') ||
-                (auth()->user()->status === 'active' && (int) $business->owner_id === (int) auth()->id())
-            ),
-            403
-        );
+        abort_unless(auth()->user() && app(BusinessAccessService::class)->can(auth()->user(), $business, 'billing.view'), 403);
     }
 
     private function authorizeDoc(GrowyaSubscriptionBillingDocument $document): void
@@ -76,8 +72,8 @@ class GrowyaSubscriptionBillingController extends Controller
         ]);
 
         return $query
-            ->when($request->filled('from'), fn($q) => $q->whereDate('issued_at', '>=', $request->input('from')))
-            ->when($request->filled('to'), fn($q) => $q->whereDate('issued_at', '<=', $request->input('to')))
+            ->when($request->filled('from'), fn ($q) => $q->whereDate('issued_at', '>=', $request->input('from')))
+            ->when($request->filled('to'), fn ($q) => $q->whereDate('issued_at', '<=', $request->input('to')))
             ->latest('issued_at');
     }
 
@@ -99,11 +95,11 @@ class GrowyaSubscriptionBillingController extends Controller
     public function pdf(GrowyaSubscriptionBillingDocument $document)
     {
         $this->authorizeDoc($document);
-        abort_unless(class_exists(\Barryvdh\DomPDF\Facade\Pdf::class), 503, 'Install barryvdh/laravel-dompdf first.');
+        abort_unless(class_exists(Pdf::class), 503, 'Install barryvdh/laravel-dompdf first.');
 
-        $filename = Str::slug($document->document_number ?: 'document-' . $document->id) . '.pdf';
+        $filename = Str::slug($document->document_number ?: 'document-'.$document->id).'.pdf';
 
-        return \Barryvdh\DomPDF\Facade\Pdf::loadView('growya-billing.document', [
+        return Pdf::loadView('growya-billing.document', [
             'doc' => $document,
             'isPdf' => true,
         ])->setPaper('a4')->download($filename);

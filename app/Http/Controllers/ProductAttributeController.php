@@ -47,7 +47,7 @@ class ProductAttributeController extends Controller
             'products.view'
         );
 
-        $attributes = Attribute::query()
+        $attributes = Attribute::query()->where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))
             ->whereHas('values')
             ->with([
                 'values' => fn ($query) => $query
@@ -90,7 +90,7 @@ class ProductAttributeController extends Controller
                 'required',
                 'integer',
                 'distinct',
-                Rule::exists('attribute_values', 'id'),
+                Rule::exists('attribute_values', 'id')->whereIn('attribute_id', Attribute::where(fn ($q) => $q->whereNull('business_id')->orWhere('business_id', $business->id))->select('id')),
             ],
         ]);
 

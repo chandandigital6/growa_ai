@@ -4,11 +4,13 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
-        // Agar pichle failed migration se अधूरी table bachi ho toh pehle hata dega
-        Schema::dropIfExists('growya_subscription_billing_documents');
+        if (Schema::hasTable('growya_subscription_billing_documents')) {
+            throw new RuntimeException('Billing document table already exists. Reconcile its schema before marking this migration as applied; existing invoices were preserved.');
+        }
 
         Schema::create('growya_subscription_billing_documents', function (Blueprint $table) {
             $table->id();

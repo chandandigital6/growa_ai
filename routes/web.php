@@ -1,87 +1,90 @@
 <?php
 
+use App\Http\Controllers\AdminBusinessReviewController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\AttributeController;
 use App\Http\Controllers\BusinessController;
-use App\Http\Controllers\PermissionController;
-use App\Http\Controllers\RoleController;
-use App\Http\Middleware\EnsureTeamMembership;
-use Illuminate\Support\Facades\Route;
-use Laravel\Fortify\Features;
-use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\BusinessFollowController;
+use App\Http\Controllers\BusinessGalleryController;
 use App\Http\Controllers\BusinessHourController;
+use App\Http\Controllers\BusinessOfferController;
+use App\Http\Controllers\BusinessReviewController;
 use App\Http\Controllers\BusinessSocialLinkController;
 use App\Http\Controllers\BusinessStaffController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProductImageController;
-use App\Http\Controllers\ProductVariantController;
-use App\Http\Controllers\TagController;
-use App\Http\Controllers\ProductTagController;
-use App\Http\Controllers\AttributeController;
-use App\Http\Controllers\ProductAttributeController;
-use App\Http\Controllers\ProductInventoryController;
-use App\Http\Controllers\ProductVariantAttributeController;
-use App\Http\Controllers\PublicProductController;
-use App\Http\Controllers\ProductQrCodeController;
-use App\Http\Controllers\ProductBulkController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\ServiceImageController;
-use App\Http\Controllers\PublicServiceEnquiryController;
-use App\Http\Controllers\ServiceEnquiryController;
-use App\Http\Controllers\ServiceEnquiryFollowUpController;
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\BusinessGalleryController;
 use App\Http\Controllers\BusinessVerificationController;
-use App\Http\Controllers\PublicBusinessController;
-use App\Http\Controllers\PublicMarketplaceController;
-use App\Http\Controllers\PublicHomeController;
-use App\Http\Controllers\GrowyaDashboardController;
-use App\Http\Controllers\GrowyaBusinessRequestController;
-use App\Http\Controllers\PublicGlobalSearchController;
-use App\Http\Controllers\BusinessFollowController;
-use App\Http\Controllers\BusinessReviewController;
-use App\Http\Controllers\AdminBusinessReviewController;
-use App\Http\Controllers\GrowyaNotificationController;
-use App\Http\Controllers\GrowyaLiveNotificationController;
-use App\Http\Controllers\BusinessOfferController;
-use App\Http\Controllers\PublicOfferController;
-use App\Http\Controllers\PublicOffersExploreController;
-use App\Http\Controllers\ProductEnquiryController;
-use App\Http\Controllers\GrowyaCartCheckoutController;
-use App\Http\Controllers\GrowyaBusinessOrderController;
-use App\Http\Controllers\GrowyaPaymentController;
-use App\Http\Controllers\GrowyaOrderReturnsController;
-use App\Http\Controllers\GrowyaDeliveryTrackingController;
-use App\Http\Controllers\GrowyaUserRoleController;
-use App\Http\Controllers\GrowyaBusinessOwnershipController;
-use App\Http\Controllers\GrowyaCustomerAddressController;
-use App\Http\Controllers\GrowyaWishlistController;
-use App\Http\Controllers\GrowyaCouponController;
-use App\Http\Controllers\GrowyaPlanEntitlementController;
-use App\Http\Controllers\GrowyaBusinessPlanOverrideController;
-use App\Http\Controllers\GrowyaPaidPromotionController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GrowyaAnalyticsController;
-use App\Http\Controllers\GrowyaSupportTicketController;
+use App\Http\Controllers\GrowyaBusinessClaimController;
+use App\Http\Controllers\GrowyaBusinessCrmController;
 use App\Http\Controllers\GrowyaBusinessKycController;
+use App\Http\Controllers\GrowyaBusinessOrderController;
+use App\Http\Controllers\GrowyaBusinessOwnershipController;
+use App\Http\Controllers\GrowyaBusinessPlanOverrideController;
+use App\Http\Controllers\GrowyaBusinessRequestController;
+use App\Http\Controllers\GrowyaCartCheckoutController;
 use App\Http\Controllers\GrowyaChatController;
 use App\Http\Controllers\GrowyaChatEnhancementController;
-use App\Http\Controllers\GrowyaBusinessClaimController;
-use App\Http\Controllers\GrowyaNearbyController;
-use App\Http\Controllers\GrowyaLeadInsightsController;
-use App\Http\Controllers\GrowyaBusinessCrmController;
+use App\Http\Controllers\GrowyaCouponController;
 use App\Http\Controllers\GrowyaCrmAdvancedController;
-use App\Http\Controllers\GrowyaCrmStaffController;
 use App\Http\Controllers\GrowyaCrmIncentiveController;
+use App\Http\Controllers\GrowyaCrmKanbanController;
+use App\Http\Controllers\GrowyaCrmStaffController;
+use App\Http\Controllers\GrowyaCustomerAddressController;
+use App\Http\Controllers\GrowyaDashboardController;
+use App\Http\Controllers\GrowyaDeliveryTrackingController;
 use App\Http\Controllers\GrowyaFinanceController;
-
-
+use App\Http\Controllers\GrowyaLeadInsightsController;
+use App\Http\Controllers\GrowyaLiveNotificationController;
+use App\Http\Controllers\GrowyaNearbyController;
+use App\Http\Controllers\GrowyaNotificationController;
+use App\Http\Controllers\GrowyaOrderReturnsController;
+use App\Http\Controllers\GrowyaPaidPromotionController;
+use App\Http\Controllers\GrowyaPaymentController;
+use App\Http\Controllers\GrowyaPlanController;
+use App\Http\Controllers\GrowyaPlanEntitlementController;
+use App\Http\Controllers\GrowyaReferralController;
+use App\Http\Controllers\GrowyaReminderPreferenceController;
+use App\Http\Controllers\GrowyaRoleMatrixController;
+use App\Http\Controllers\GrowyaSubscriptionBillingController;
+use App\Http\Controllers\GrowyaSubscriptionController;
+use App\Http\Controllers\GrowyaSupportTicketController;
+use App\Http\Controllers\GrowyaUserRoleController;
+use App\Http\Controllers\GrowyaWishlistController;
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\ProductAttributeController;
+use App\Http\Controllers\ProductBulkController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductEnquiryController;
+use App\Http\Controllers\ProductImageController;
+use App\Http\Controllers\ProductInventoryController;
+use App\Http\Controllers\ProductQrCodeController;
+use App\Http\Controllers\ProductTagController;
+use App\Http\Controllers\ProductVariantAttributeController;
+use App\Http\Controllers\ProductVariantController;
+use App\Http\Controllers\PublicBusinessController;
+use App\Http\Controllers\PublicGlobalSearchController;
+use App\Http\Controllers\PublicHomeController;
+use App\Http\Controllers\PublicMarketplaceController;
+use App\Http\Controllers\PublicOfferController;
+use App\Http\Controllers\PublicOffersExploreController;
+use App\Http\Controllers\PublicProductController;
+use App\Http\Controllers\PublicServiceEnquiryController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceEnquiryController;
+use App\Http\Controllers\ServiceEnquiryFollowUpController;
+use App\Http\Controllers\ServiceImageController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\TenantCatalogController;
+use App\Http\Middleware\GrowyaSuperAdminOnly;
+use Illuminate\Support\Facades\Route;
 
 Route::get('nearby-businesses', [GrowyaNearbyController::class, 'index'])->name('growya.nearby.index');
 
-
-Route::get('my-referrals', [\App\Http\Controllers\GrowyaReferralController::class, 'mine'])->name('growya.referrals.mine');
-Route::get('admin/referrals', [\App\Http\Controllers\GrowyaReferralController::class, 'admin'])->name('growya.referrals.admin');
-Route::patch('admin/referrals/settings', [\App\Http\Controllers\GrowyaReferralController::class, 'settings'])->name('growya.referrals.settings');
-Route::post('/admin/referrals/{referral}/approve', [\App\Http\Controllers\GrowyaReferralController::class, 'approveBusinessReward'])->name('growya.referrals.approve');
+Route::get('my-referrals', [GrowyaReferralController::class, 'mine'])->middleware('auth')->name('growya.referrals.mine');
+Route::get('admin/referrals', [GrowyaReferralController::class, 'admin'])->middleware('auth')->name('growya.referrals.admin');
+Route::patch('admin/referrals/settings', [GrowyaReferralController::class, 'settings'])->middleware('auth')->name('growya.referrals.settings');
+Route::post('/admin/referrals/{referral}/approve', [GrowyaReferralController::class, 'approveBusinessReward'])->middleware('auth')->name('growya.referrals.approve');
 
 Route::get('b/{business:slug}/offers', [PublicOfferController::class, 'index'])->name('public.business.offers');
 
@@ -96,54 +99,37 @@ Route::get(
 )->middleware(['auth', 'throttle:12,1'])
     ->name('growya.notifications.poll');
 
-
-Route::get('my-notifications', [GrowyaNotificationController::class, 'index'])->name('growya.notifications.index');
-Route::post('my-notifications/{recipient}/open', [GrowyaNotificationController::class, 'open'])->name('growya.notifications.open');
-Route::patch('my-notifications/{recipient}/read', [GrowyaNotificationController::class, 'read'])->name('growya.notifications.read');
-Route::patch('my-notifications/read-all', [GrowyaNotificationController::class, 'readAll'])->name('growya.notifications.read-all');
-
-
+Route::get('my-notifications', [GrowyaNotificationController::class, 'index'])->middleware('auth')->name('growya.notifications.index');
+Route::post('my-notifications/{recipient}/open', [GrowyaNotificationController::class, 'open'])->middleware('auth')->name('growya.notifications.open');
+Route::patch('my-notifications/{recipient}/read', [GrowyaNotificationController::class, 'read'])->middleware('auth')->name('growya.notifications.read');
+Route::patch('my-notifications/read-all', [GrowyaNotificationController::class, 'readAll'])->middleware('auth')->name('growya.notifications.read-all');
 
 Route::get('products/{business}/{product}/enquiry', [ProductEnquiryController::class, 'create'])->name('public.products.enquiry.create');
 Route::post('products/{business}/{product}/enquiry', [ProductEnquiryController::class, 'store'])->middleware('throttle:5,1')->name('public.products.enquiry.store');
 
-
 Route::get('b/{slug}/reviews', [BusinessReviewController::class, 'publicIndex'])
     ->name('public.business.reviews.index');
 
-
-
 Route::get('promoted/{promotion}', [GrowyaPaidPromotionController::class, 'click'])->middleware('throttle:60,1')->name('growya.promotions.click');
-
 
 // Authenticated explicit routes (no Route::resource)
 Route::middleware('auth')->group(function () {
 
+    Route::get('businesses/{business}/finance', [GrowyaFinanceController::class, 'index'])->name('growya.finance.index');
+    Route::post('businesses/{business}/finance/categories', [GrowyaFinanceController::class, 'storeCategory'])->name('growya.finance.categories.store');
+    Route::post('businesses/{business}/finance', [GrowyaFinanceController::class, 'store'])->name('growya.finance.store');
+    Route::patch('businesses/{business}/finance/{entry}', [GrowyaFinanceController::class, 'update'])->name('growya.finance.update');
+    Route::delete('businesses/{business}/finance/{entry}', [GrowyaFinanceController::class, 'destroy'])->name('growya.finance.destroy');
+    Route::get('businesses/{business}/finance/export', [GrowyaFinanceController::class, 'export'])->name('growya.finance.export');
 
-
-
-Route::get('businesses/{business}/finance', [GrowyaFinanceController::class,'index'])->name('growya.finance.index');
-Route::post('businesses/{business}/finance/categories', [GrowyaFinanceController::class,'storeCategory'])->name('growya.finance.categories.store');
-Route::post('businesses/{business}/finance', [GrowyaFinanceController::class,'store'])->name('growya.finance.store');
-Route::patch('businesses/{business}/finance/{entry}', [GrowyaFinanceController::class,'update'])->name('growya.finance.update');
-Route::delete('businesses/{business}/finance/{entry}', [GrowyaFinanceController::class,'destroy'])->name('growya.finance.destroy');
-Route::get('businesses/{business}/finance/export', [GrowyaFinanceController::class,'export'])->name('growya.finance.export');
-
-
-
-
-Route::get('businesses/{business}/crm-incentives', [GrowyaCrmIncentiveController::class,'index'])->name('growya.crm.incentives.index');
-Route::get('businesses/{business}/crm-incentives/report', [GrowyaCrmIncentiveController::class,'report'])->name('growya.crm.incentives.report');
-Route::get('businesses/{business}/crm-incentives/export', [GrowyaCrmIncentiveController::class,'export'])->name('growya.crm.incentives.export');
-Route::post('businesses/{business}/crm-incentives/rules', [GrowyaCrmIncentiveController::class,'rule'])->name('growya.crm.incentives.rule');
-Route::patch('businesses/{business}/crm-incentives/rules/{rule}/toggle', [GrowyaCrmIncentiveController::class,'toggleRule'])->name('growya.crm.incentives.rule.toggle');
-Route::post('businesses/{business}/crm-incentives/claims', [GrowyaCrmIncentiveController::class,'claim'])->name('growya.crm.incentives.claim');
-Route::patch('businesses/{business}/crm-incentives/claims/{claim}/review', [GrowyaCrmIncentiveController::class,'review'])->name('growya.crm.incentives.review');
-Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaCrmIncentiveController::class,'pay'])->name('growya.crm.incentives.pay');
-
-
-
-
+    Route::get('businesses/{business}/crm-incentives', [GrowyaCrmIncentiveController::class, 'index'])->name('growya.crm.incentives.index');
+    Route::get('businesses/{business}/crm-incentives/report', [GrowyaCrmIncentiveController::class, 'report'])->name('growya.crm.incentives.report');
+    Route::get('businesses/{business}/crm-incentives/export', [GrowyaCrmIncentiveController::class, 'export'])->name('growya.crm.incentives.export');
+    Route::post('businesses/{business}/crm-incentives/rules', [GrowyaCrmIncentiveController::class, 'rule'])->name('growya.crm.incentives.rule');
+    Route::patch('businesses/{business}/crm-incentives/rules/{rule}/toggle', [GrowyaCrmIncentiveController::class, 'toggleRule'])->name('growya.crm.incentives.rule.toggle');
+    Route::post('businesses/{business}/crm-incentives/claims', [GrowyaCrmIncentiveController::class, 'claim'])->name('growya.crm.incentives.claim');
+    Route::patch('businesses/{business}/crm-incentives/claims/{claim}/review', [GrowyaCrmIncentiveController::class, 'review'])->name('growya.crm.incentives.review');
+    Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaCrmIncentiveController::class, 'pay'])->name('growya.crm.incentives.pay');
 
     Route::get('businesses/{business}/crm-staff', [GrowyaCrmStaffController::class, 'dashboard'])->name('growya.crm.staff.dashboard');
     Route::get('businesses/{business}/crm-staff/report', [GrowyaCrmStaffController::class, 'report'])->name('growya.crm.staff.report');
@@ -153,16 +139,13 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::patch('businesses/{business}/crm-staff/{contact}/progress', [GrowyaCrmStaffController::class, 'progress'])->name('growya.crm.staff.progress');
     Route::post('businesses/{business}/crm-staff/{contact}/activities', [GrowyaCrmStaffController::class, 'activity'])->name('growya.crm.staff.activity');
 
-    Route::get('businesses/{business}/crm-kanban', [\App\Http\Controllers\GrowyaCrmKanbanController::class, 'index'])->name('growya.crm.kanban.index');
-    Route::patch('businesses/{business}/crm-kanban/{contact}', [\App\Http\Controllers\GrowyaCrmKanbanController::class, 'update'])->name('growya.crm.kanban.update');
-
-
+    Route::get('businesses/{business}/crm-kanban', [GrowyaCrmKanbanController::class, 'index'])->name('growya.crm.kanban.index');
+    Route::patch('businesses/{business}/crm-kanban/{contact}', [GrowyaCrmKanbanController::class, 'update'])->name('growya.crm.kanban.update');
 
     Route::get(
         'businesses/{business}/crm/{contact}/360',
         [GrowyaCrmAdvancedController::class, 'show']
     )->name('growya.crm.advanced.show');
-
 
     Route::get(
         'businesses/{business}/lead-insights',
@@ -184,8 +167,6 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
         [GrowyaLeadInsightsController::class, 'adminExport']
     )->name('growya.lead-insights.admin.export');
 
-
-
     Route::get('businesses/{business}/crm', [GrowyaBusinessCrmController::class, 'index'])->name('growya.crm.index');
     Route::get('businesses/{business}/crm/create', [GrowyaBusinessCrmController::class, 'create'])->name('growya.crm.create');
     Route::post('businesses/{business}/crm', [GrowyaBusinessCrmController::class, 'store'])->name('growya.crm.store');
@@ -195,7 +176,6 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::get('businesses/{business}/crm/{contact}/edit', [GrowyaBusinessCrmController::class, 'edit'])->name('growya.crm.edit');
     Route::patch('businesses/{business}/crm/{contact}', [GrowyaBusinessCrmController::class, 'update'])->name('growya.crm.update');
     Route::post('businesses/{business}/crm/{contact}/activities', [GrowyaBusinessCrmController::class, 'note'])->name('growya.crm.note');
-
 
     Route::post('b/{slug}/reviews', [BusinessReviewController::class, 'store'])
         ->middleware('throttle:5,1')->name('public.business.reviews.store');
@@ -210,14 +190,11 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::patch('admin/business-reviews/{review}/moderate', [AdminBusinessReviewController::class, 'update'])
         ->name('admin.business-reviews.update');
 
-
     Route::get('businesses/{business}/map-location', [GrowyaNearbyController::class, 'edit'])->name('growya.nearby.location.edit');
     Route::patch('businesses/{business}/map-location', [GrowyaNearbyController::class, 'update'])->name('growya.nearby.location.update');
 
-    Route::get('my-reminder-preferences', [\App\Http\Controllers\GrowyaReminderPreferenceController::class, 'edit'])->name('growya.reminders.preferences');
-    Route::patch('my-reminder-preferences', [\App\Http\Controllers\GrowyaReminderPreferenceController::class, 'update'])->name('growya.reminders.preferences.update');
-
-
+    Route::get('my-reminder-preferences', [GrowyaReminderPreferenceController::class, 'edit'])->name('growya.reminders.preferences');
+    Route::patch('my-reminder-preferences', [GrowyaReminderPreferenceController::class, 'update'])->name('growya.reminders.preferences.update');
 
     Route::get('my-wishlist', [GrowyaWishlistController::class, 'mine'])->name('growya.wishlist.mine');
     Route::post('my-wishlist/{type}/{id}', [GrowyaWishlistController::class, 'add'])->middleware('throttle:15,1')->whereNumber('id')->name('growya.wishlist.add');
@@ -227,39 +204,27 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::get('admin/wishlist-interests', [GrowyaWishlistController::class, 'admin'])->name('growya.admin.wishlist.index');
     Route::patch('admin/wishlist-interests/{interest}', [GrowyaWishlistController::class, 'adminUpdate'])->name('growya.admin.wishlist.update');
 
-
-
     Route::get('businesses/{business}/coupons', [GrowyaCouponController::class, 'index'])->name('businesses.coupons.index');
     Route::get('businesses/{business}/coupons/create', [GrowyaCouponController::class, 'create'])->name('businesses.coupons.create');
     Route::post('businesses/{business}/coupons', [GrowyaCouponController::class, 'store'])->name('businesses.coupons.store');
     Route::get('businesses/{business}/coupons/{coupon}/edit', [GrowyaCouponController::class, 'edit'])->name('businesses.coupons.edit');
     Route::patch('businesses/{business}/coupons/{coupon}', [GrowyaCouponController::class, 'update'])->name('businesses.coupons.update');
 
-
-
-    Route::get('admin/subscription-plans', [\App\Http\Controllers\GrowyaPlanController::class, 'index'])->name('growya.plans.index');
-    Route::post('admin/subscription-plans', [\App\Http\Controllers\GrowyaPlanController::class, 'store'])->name('growya.plans.store');
-    Route::patch('admin/subscription-plans/{plan}', [\App\Http\Controllers\GrowyaPlanController::class, 'update'])->name('growya.plans.update');
-    Route::get('admin/subscriptions', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'adminIndex'])->name('growya.subscriptions.admin');
-    Route::patch('admin/subscriptions/{subscription}/review', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'review'])->name('growya.subscriptions.review');
-    Route::get('businesses/{business}/subscriptions', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'index'])->name('growya.subscriptions.business');
-    Route::post('businesses/{business}/subscriptions', [\App\Http\Controllers\GrowyaSubscriptionController::class, 'request'])->middleware('throttle:5,1')->name('growya.subscriptions.request');
-
-
-
+    Route::get('admin/subscription-plans', [GrowyaPlanController::class, 'index'])->name('growya.plans.index');
+    Route::post('admin/subscription-plans', [GrowyaPlanController::class, 'store'])->name('growya.plans.store');
+    Route::patch('admin/subscription-plans/{plan}', [GrowyaPlanController::class, 'update'])->name('growya.plans.update');
+    Route::get('admin/subscriptions', [GrowyaSubscriptionController::class, 'adminIndex'])->name('growya.subscriptions.admin');
+    Route::patch('admin/subscriptions/{subscription}/review', [GrowyaSubscriptionController::class, 'review'])->name('growya.subscriptions.review');
+    Route::get('businesses/{business}/subscriptions', [GrowyaSubscriptionController::class, 'index'])->name('growya.subscriptions.business');
+    Route::post('businesses/{business}/subscriptions', [GrowyaSubscriptionController::class, 'request'])->middleware('throttle:5,1')->name('growya.subscriptions.request');
 
     Route::get('admin/subscription-plans/{plan}/limits', [GrowyaPlanEntitlementController::class, 'edit'])->name('growya.entitlements.edit');
     Route::patch('admin/subscription-plans/{plan}/limits', [GrowyaPlanEntitlementController::class, 'update'])->name('growya.entitlements.update');
     Route::get('businesses/{business}/plan-usage', [GrowyaPlanEntitlementController::class, 'usage'])->name('growya.entitlements.usage');
 
-
-
-
     Route::get('admin/businesses/{business}/plan-overrides', [GrowyaBusinessPlanOverrideController::class, 'edit'])->name('growya.plan-overrides.edit');
     Route::post('admin/businesses/{business}/plan-overrides', [GrowyaBusinessPlanOverrideController::class, 'save'])->name('growya.plan-overrides.save');
     Route::delete('admin/businesses/{business}/plan-overrides/{key}', [GrowyaBusinessPlanOverrideController::class, 'remove'])->name('growya.plan-overrides.remove');
-
-
 
     Route::get('admin/paid-promotion-packages', [GrowyaPaidPromotionController::class, 'packages'])->name('growya.promotions.packages');
     Route::post('admin/paid-promotion-packages', [GrowyaPaidPromotionController::class, 'storePackage'])->name('growya.promotions.packages.store');
@@ -268,7 +233,6 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::patch('admin/paid-promotions/{promotion}', [GrowyaPaidPromotionController::class, 'review'])->name('growya.promotions.review');
     Route::get('businesses/{business}/paid-promotions', [GrowyaPaidPromotionController::class, 'ownerIndex'])->name('growya.promotions.owner');
     Route::post('businesses/{business}/paid-promotions', [GrowyaPaidPromotionController::class, 'request'])->middleware('throttle:5,1')->name('growya.promotions.owner.request');
-
 
     Route::get('businesses/{business}/analytics', [GrowyaAnalyticsController::class, 'owner'])
         ->name('growya.analytics.owner');
@@ -279,8 +243,6 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::get('admin/analytics/export', [GrowyaAnalyticsController::class, 'adminExport'])
         ->name('growya.analytics.admin.export');
 
-
-
     Route::get('support/tickets', [GrowyaSupportTicketController::class, 'index'])->name('growya.support.index');
     Route::get('support/tickets/create', [GrowyaSupportTicketController::class, 'create'])->name('growya.support.create');
     Route::post('support/tickets', [GrowyaSupportTicketController::class, 'store'])->middleware('throttle:5,1')->name('growya.support.store');
@@ -290,18 +252,12 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::patch('support/tickets/{ticket}/assign', [GrowyaSupportTicketController::class, 'assign'])->name('growya.support.assign');
     Route::get('support/tickets/{ticket}/attachments/{attachment}', [GrowyaSupportTicketController::class, 'attachment'])->name('growya.support.attachment');
 
-
-
-
-
     Route::get('businesses/{business}/kyc', [GrowyaBusinessKycController::class, 'owner'])->name('growya.kyc.owner');
     Route::post('businesses/{business}/kyc', [GrowyaBusinessKycController::class, 'submit'])->middleware('throttle:3,1')->name('growya.kyc.submit');
     Route::get('admin/business-kyc', [GrowyaBusinessKycController::class, 'admin'])->name('growya.kyc.admin');
     Route::get('admin/business-kyc/{submission}', [GrowyaBusinessKycController::class, 'adminShow'])->name('growya.kyc.admin.show');
     Route::patch('admin/business-kyc/{submission}', [GrowyaBusinessKycController::class, 'review'])->name('growya.kyc.review');
     Route::get('business-kyc/{submission}/documents/{document}', [GrowyaBusinessKycController::class, 'download'])->name('growya.kyc.download');
-
-
 
     Route::get('my-messages', [GrowyaChatController::class, 'mine'])->name('growya.chat.mine');
     Route::get('businesses/{business}/messages', [GrowyaChatController::class, 'inbox'])->name('growya.chat.inbox');
@@ -310,8 +266,6 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::get('messages/{thread}/poll', [GrowyaChatController::class, 'poll'])->middleware('throttle:12,1')->name('growya.chat.poll');
     Route::post('messages/{thread}', [GrowyaChatController::class, 'send'])->middleware('throttle:20,1')->name('growya.chat.send');
     Route::get('messages/{thread}/files/{message}', [GrowyaChatController::class, 'file'])->name('growya.chat.file');
-
-
 
     Route::patch('messages/{thread}/assign', [GrowyaChatEnhancementController::class, 'assign'])->name('growya.chat.assign');
     Route::patch('messages/{thread}/block', [GrowyaChatEnhancementController::class, 'block'])->name('growya.chat.block');
@@ -322,11 +276,6 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::patch('admin/chat-reports/{report}', [GrowyaChatEnhancementController::class, 'review'])->name('growya.chat.reports.review');
     Route::get('my-messages/unread-count', [GrowyaChatEnhancementController::class, 'unread'])->middleware('throttle:15,1')->name('growya.chat.unread');
 
-
-
-
-
-
     Route::get('businesses/{business}/claim', [GrowyaBusinessClaimController::class, 'create'])->name('growya.claims.create');
     Route::post('businesses/{business}/claim', [GrowyaBusinessClaimController::class, 'store'])->middleware('throttle:3,1')->name('growya.claims.store');
     Route::get('my-business-claims', [GrowyaBusinessClaimController::class, 'mine'])->name('growya.claims.mine');
@@ -335,19 +284,13 @@ Route::patch('businesses/{business}/crm-incentives/claims/{claim}/pay', [GrowyaC
     Route::get('admin/business-claims', [GrowyaBusinessClaimController::class, 'admin'])->name('growya.claims.admin');
     Route::patch('admin/business-claims/{claim}/review', [GrowyaBusinessClaimController::class, 'review'])->name('growya.claims.review');
 
-
-
-
-    Route::get('admin/subscription-billing', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'adminIndex'])->name('growya.billing.admin');
-    Route::post('admin/subscription-billing/payments/{payment}', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'issue'])->middleware('throttle:10,1')->name('growya.billing.issue');
-    Route::get('admin/subscription-billing/export', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'export'])->name('growya.billing.export');
-    Route::get('businesses/{business}/billing', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'ownerIndex'])->name('growya.billing.owner');
-    Route::get('subscription-billing/{document}', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'show'])->name('growya.billing.show');
-    Route::get('subscription-billing/{document}/pdf', [\App\Http\Controllers\GrowyaSubscriptionBillingController::class, 'pdf'])->name('growya.billing.pdf');
+    Route::get('admin/subscription-billing', [GrowyaSubscriptionBillingController::class, 'adminIndex'])->name('growya.billing.admin');
+    Route::post('admin/subscription-billing/payments/{payment}', [GrowyaSubscriptionBillingController::class, 'issue'])->middleware('throttle:10,1')->name('growya.billing.issue');
+    Route::get('admin/subscription-billing/export', [GrowyaSubscriptionBillingController::class, 'export'])->name('growya.billing.export');
+    Route::get('businesses/{business}/billing', [GrowyaSubscriptionBillingController::class, 'ownerIndex'])->name('growya.billing.owner');
+    Route::get('subscription-billing/{document}', [GrowyaSubscriptionBillingController::class, 'show'])->name('growya.billing.show');
+    Route::get('subscription-billing/{document}/pdf', [GrowyaSubscriptionBillingController::class, 'pdf'])->name('growya.billing.pdf');
 });
-
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get(
@@ -366,14 +309,12 @@ Route::middleware('auth')->group(function () {
     )->name('public.business.unfollow');
 });
 
-
 Route::get('/', [PublicHomeController::class, 'index'])->name('home');
 
 Route::get(
     '/marketplace',
     [PublicMarketplaceController::class, 'index']
 )->name('public.marketplace.index');
-
 
 Route::get(
     'search',
@@ -385,8 +326,6 @@ Route::get(
     [PublicGlobalSearchController::class, 'suggest']
 )->middleware('throttle:30,1')
     ->name('public.search.suggest');
-
-
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Route::view('dashboard', 'dashboard')->name('dashboard');
@@ -400,7 +339,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('business-applications', [GrowyaBusinessRequestController::class, 'index'])
         ->name('growya.business-request.status');
 
-    Route::middleware(\App\Http\Middleware\GrowyaSuperAdminOnly::class)->group(function () {
+    Route::middleware(GrowyaSuperAdminOnly::class)->group(function () {
         Route::resource('roles', RoleController::class);
         Route::delete('roles/{role}/permissions/{permission}', [RoleController::class, 'removePermission'])
             ->name('roles.permissions.remove');
@@ -409,8 +348,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('permissions/assign', [PermissionController::class, 'assign'])->name('permissions.assign');
         Route::post('permissions/store', [PermissionController::class, 'store'])->name('permissions.store');
         Route::delete('permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
-        Route::get('admin/access-control', [\App\Http\Controllers\GrowyaRoleMatrixController::class, 'index'])->name('growya.roles.matrix');
-        Route::patch('admin/access-control/roles/{role}', [\App\Http\Controllers\GrowyaRoleMatrixController::class, 'update'])->name('growya.roles.matrix.update');
+        Route::get('admin/access-control', [GrowyaRoleMatrixController::class, 'index'])->name('growya.roles.matrix');
+        Route::patch('admin/access-control/roles/{role}', [GrowyaRoleMatrixController::class, 'update'])->name('growya.roles.matrix.update');
     });
 
     Route::get('admin/user-roles', [GrowyaUserRoleController::class, 'index'])
@@ -426,10 +365,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('throttle:10,1')->name('growya.ownership.update');
 
     Route::get('/users', function () {
+        abort_unless(auth()->user()?->hasRole('super_admin', 'web'), 403);
+
         return view('users.index');
     })->name('users.index');
-
-
 
     Route::get('my-orders/{order}/payment', [GrowyaPaymentController::class, 'customerIndex'])->name('growya.payments.customer');
     Route::post('my-orders/{order}/payment', [GrowyaPaymentController::class, 'submit'])->middleware('throttle:5,1')->name('growya.payments.submit');
@@ -438,19 +377,16 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('businesses/{business}/orders/{order}/payment/{submission}/review', [GrowyaPaymentController::class, 'review'])->name('businesses.payments.review');
     Route::get('businesses/{business}/orders/{order}/payment/{submission}/proof', [GrowyaPaymentController::class, 'proof'])->name('businesses.payments.proof');
 
-
     Route::get('my-orders/{order}/returns', [GrowyaOrderReturnsController::class, 'customerIndex'])->name('growya.returns.customer');
     Route::post('my-orders/{order}/returns', [GrowyaOrderReturnsController::class, 'submit'])->middleware('throttle:5,1')->name('growya.returns.submit');
     Route::get('businesses/{business}/returns', [GrowyaOrderReturnsController::class, 'sellerIndex'])->name('businesses.returns.index');
     Route::patch('businesses/{business}/returns/{returnRequest}/review', [GrowyaOrderReturnsController::class, 'review'])->name('businesses.returns.review');
     Route::patch('businesses/{business}/returns/{returnRequest}/refund', [GrowyaOrderReturnsController::class, 'markRefunded'])->name('businesses.returns.refund');
 
-
     Route::get('my-orders/{order}/tracking', [GrowyaDeliveryTrackingController::class, 'customer'])->name('growya.orders.tracking');
     Route::get('businesses/{business}/delivery', [GrowyaDeliveryTrackingController::class, 'index'])->name('businesses.delivery.index');
     Route::get('businesses/{business}/orders/{order}/delivery', [GrowyaDeliveryTrackingController::class, 'sellerShow'])->name('businesses.orders.delivery.show');
     Route::patch('businesses/{business}/orders/{order}/delivery', [GrowyaDeliveryTrackingController::class, 'update'])->name('businesses.orders.delivery.update');
-
 
     Route::get('shops/{business}/cart', [GrowyaCartCheckoutController::class, 'index'])->name('growya.cart.index');
     Route::post('shops/{business}/cart', [GrowyaCartCheckoutController::class, 'add'])->name('growya.cart.add');
@@ -464,21 +400,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('businesses/{business}/orders/{order}', [GrowyaBusinessOrderController::class, 'show'])->name('businesses.orders.show');
     Route::patch('businesses/{business}/orders/{order}/status', [GrowyaBusinessOrderController::class, 'status'])->name('businesses.orders.status');
 
-
     Route::get('my-addresses', [GrowyaCustomerAddressController::class, 'index'])->name('growya.addresses.index');
     Route::post('my-addresses', [GrowyaCustomerAddressController::class, 'store'])->name('growya.addresses.store');
     Route::put('my-addresses/{address}', [GrowyaCustomerAddressController::class, 'update'])->name('growya.addresses.update');
     Route::patch('my-addresses/{address}/default', [GrowyaCustomerAddressController::class, 'setDefault'])->name('growya.addresses.default');
     Route::delete('my-addresses/{address}', [GrowyaCustomerAddressController::class, 'destroy'])->name('growya.addresses.destroy');
 
-
-
     Route::get('businesses/{business}/product-enquiries', [ProductEnquiryController::class, 'index'])->name('businesses.product-enquiries.index');
     Route::get('businesses/{business}/product-enquiries/{enquiry}', [ProductEnquiryController::class, 'show'])->name('businesses.product-enquiries.show');
     Route::patch('businesses/{business}/product-enquiries/{enquiry}/status', [ProductEnquiryController::class, 'status'])->name('businesses.product-enquiries.status');
     Route::post('businesses/{business}/product-enquiries/{enquiry}/notes', [ProductEnquiryController::class, 'note'])->name('businesses.product-enquiries.notes.store');
     Route::patch('businesses/{business}/product-enquiries/{enquiry}/notes/{note}/complete', [ProductEnquiryController::class, 'complete'])->name('businesses.product-enquiries.notes.complete');
-
 
     /*
 |--------------------------------------------------------------------------
@@ -507,8 +439,6 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('businesses/{business}', [BusinessController::class, 'destroy'])
         ->name('businesses.destroy');
 
-
-
     Route::get(
         'businesses/{business}/hours',
         [BusinessHourController::class, 'index']
@@ -518,10 +448,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/hours',
         [BusinessHourController::class, 'store']
     )->name('businesses.hours.store');
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -538,11 +464,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/social-links',
         [BusinessSocialLinkController::class, 'store']
     )->name('businesses.social-links.store');
-
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -570,11 +491,8 @@ Route::middleware(['auth'])->group(function () {
         [BusinessStaffController::class, 'destroy']
     )->name('businesses.staff.destroy');
 
-
-    Route::get('businesses/{business}/staff/history', [\App\Http\Controllers\BusinessStaffController::class, 'history'])
+    Route::get('businesses/{business}/staff/history', [BusinessStaffController::class, 'history'])
         ->name('businesses.staff.history');
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -599,13 +517,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::delete('categories/{category}', [CategoryController::class, 'destroy'])
         ->name('categories.destroy');
-
-
-
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -637,13 +548,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/products/bulk/errors',
         [ProductBulkController::class, 'errorReport']
     )->name('businesses.products.bulk.errors');
-
-
-
-
-
-
-
 
     // Growya Products Management
 
@@ -682,10 +586,6 @@ Route::middleware(['auth'])->group(function () {
         [ProductController::class, 'destroy']
     )->name('businesses.products.destroy');
 
-
-
-
-
     /*
 |--------------------------------------------------------------------------
 | Product Gallery Management
@@ -717,11 +617,6 @@ Route::middleware(['auth'])->group(function () {
         [ProductImageController::class, 'destroy']
     )->name('businesses.products.gallery.destroy');
 
-
-
-
-
-
     /*
 |--------------------------------------------------------------------------
 | Growya Product Variants
@@ -747,12 +642,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/products/{product}/variants/{variant}',
         [ProductVariantController::class, 'destroy']
     )->name('businesses.products.variants.destroy');
-
-
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -780,7 +669,6 @@ Route::middleware(['auth'])->group(function () {
         [TagController::class, 'destroy']
     )->name('tags.destroy');
 
-
     /*
 |--------------------------------------------------------------------------
 | Product Tags Management
@@ -796,12 +684,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/products/{product}/tags',
         [ProductTagController::class, 'update']
     )->name('businesses.products.tags.update');
-
-
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -844,7 +726,6 @@ Route::middleware(['auth'])->group(function () {
         [AttributeController::class, 'destroyValue']
     )->name('attributes.values.destroy');
 
-
     /*
 |--------------------------------------------------------------------------
 | Product Attribute Assignment
@@ -860,10 +741,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/products/{product}/attributes',
         [ProductAttributeController::class, 'update']
     )->name('businesses.products.attributes.update');
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -881,12 +758,6 @@ Route::middleware(['auth'])->group(function () {
         [ProductVariantAttributeController::class, 'update']
     )->name('businesses.products.variants.attributes.update');
 
-
-
-
-
-
-
     /*
 |--------------------------------------------------------------------------
 | Growya Product Inventory
@@ -902,11 +773,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/products/{product}/inventory',
         [ProductInventoryController::class, 'store']
     )->name('businesses.products.inventory.store');
-
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -938,11 +804,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/products/qr/bulk-print',
         [ProductQrCodeController::class, 'bulkPrint']
     )->name('businesses.products.qr.bulk-print');
-
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -985,7 +846,6 @@ Route::middleware(['auth'])->group(function () {
         [ServiceController::class, 'destroy']
     )->name('businesses.services.destroy');
 
-
     /*
 |--------------------------------------------------------------------------
 | Service Gallery
@@ -1006,10 +866,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/services/{service}/images/{image}',
         [ServiceImageController::class, 'destroy']
     )->name('businesses.services.images.destroy');
-
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -1032,12 +888,6 @@ Route::middleware(['auth'])->group(function () {
         [ServiceEnquiryController::class, 'updateStatus']
     )->name('businesses.service-enquiries.status');
 
-
-
-
-
-
-
     /*
 |--------------------------------------------------------------------------
 | Service Enquiry Follow-up Management
@@ -1058,9 +908,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/service-enquiries/{enquiry}/follow-ups/{followUp}/complete',
         [ServiceEnquiryFollowUpController::class, 'complete']
     )->name('businesses.service-enquiries.follow-ups.complete');
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -1092,9 +939,6 @@ Route::middleware(['auth'])->group(function () {
         'businesses/{business}/appointments/{appointment}/status',
         [AppointmentController::class, 'updateStatus']
     )->name('businesses.appointments.status');
-
-
-
 
     /*
 |--------------------------------------------------------------------------
@@ -1132,10 +976,6 @@ Route::middleware(['auth'])->group(function () {
         [BusinessGalleryController::class, 'destroy']
     )->name('businesses.gallery.destroy');
 
-
-
-
-
     /*
 |--------------------------------------------------------------------------
 | Super Admin - Business Verification
@@ -1167,10 +1007,6 @@ Route::middleware(['auth'])->group(function () {
         [BusinessVerificationController::class, 'pending']
     )->name('admin.business-verifications.pending');
 
-
-
-
-
     Route::get('businesses/{business}/offers', [BusinessOfferController::class, 'index'])->name('businesses.offers.index');
     Route::get('businesses/{business}/offers/create', [BusinessOfferController::class, 'create'])->name('businesses.offers.create');
     Route::post('businesses/{business}/offers', [BusinessOfferController::class, 'store'])->name('businesses.offers.store');
@@ -1178,10 +1014,6 @@ Route::middleware(['auth'])->group(function () {
     Route::put('businesses/{business}/offers/{offer}', [BusinessOfferController::class, 'update'])->name('businesses.offers.update');
     Route::delete('businesses/{business}/offers/{offer}', [BusinessOfferController::class, 'destroy'])->name('businesses.offers.destroy');
 });
-
-
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1224,13 +1056,6 @@ Route::get(
     [PublicBusinessController::class, 'contact']
 )->name('public.business.contact');
 
-
-
-
-
-
-
-
 /*
 |--------------------------------------------------------------------------
 | Public Service Enquiries
@@ -1250,20 +1075,23 @@ Route::middleware('throttle:5,1')->group(function () {
     )->name('public.services.enquiries.store');
 });
 
-
-
-
-
-
 Route::get(
     'p/{business}/{product}',
     [PublicProductController::class, 'show']
 )->name('public.products.show');
-
 
 Route::middleware(['auth'])->group(function () {
     Route::livewire('invitations/{invitation}/accept', 'pages::teams.accept-invitation')
         ->name('invitations.accept');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';
+
+Route::middleware('auth')->group(function () {
+    Route::get('businesses/{business}/catalog/{kind}', [TenantCatalogController::class, 'index'])->whereIn('kind', ['categories', 'attributes'])->name('businesses.catalog.index');
+    Route::post('businesses/{business}/catalog/{kind}', [TenantCatalogController::class, 'store'])->whereIn('kind', ['categories', 'attributes'])->name('businesses.catalog.store');
+    Route::put('businesses/{business}/catalog/{kind}/{item}', [TenantCatalogController::class, 'update'])->whereIn('kind', ['categories', 'attributes'])->whereNumber('item')->name('businesses.catalog.update');
+    Route::delete('businesses/{business}/catalog/{kind}/{item}', [TenantCatalogController::class, 'destroy'])->whereIn('kind', ['categories', 'attributes'])->whereNumber('item')->name('businesses.catalog.destroy');
+    Route::post('businesses/{business}/catalog-attributes/{attribute}/values', [TenantCatalogController::class, 'storeValue'])->name('businesses.catalog.values.store');
+    Route::delete('businesses/{business}/catalog-attributes/{attribute}/values/{value}', [TenantCatalogController::class, 'destroyValue'])->name('businesses.catalog.values.destroy');
+});
